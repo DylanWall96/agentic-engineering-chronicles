@@ -337,7 +337,7 @@ A handful of patterns that keep showing up in successful adoptions:
 
 **Plan-first.** Approval gates beat speed. The cost of iterating on a plan is tiny compared to the cost of iterating on a half-implemented feature.
 
-**Verification beats execution.** A large share of useful work is planning and review, not generation. Time saved writing code reappears downstream as time spent auditing it — the constraint moves rather than disappearing. Allocate accordingly.
+**Verification beats execution.** A large share of useful work is planning and review, not generation. Time saved writing code reappears downstream as time spent auditing it — the constraint moves rather than disappearing. Allocate accordingly. Chronicle 002 takes this apart: what verification means once the agent is the one writing the code.
 
 **Tracer-bullet PRs over horizontal phasing.** Break work into vertical slices that go end-to-end (DB + service + UI) rather than horizontal phases (all DB first, then all API, then all UI). Agents default to horizontal; correct them. Vertical slices give end-to-end signal early.
 
@@ -372,7 +372,6 @@ A handful of patterns that keep showing up in successful adoptions:
 | Defer tool definitions | Turn on progressive tool loading; it removes most of the standing cost |
 | Cap tool servers | A handful per project — for accuracy and blast radius, not tokens |
 | Contain, don't supervise | Managed permissions plus sandbox; constrain what the agent *can* do |
-| Trust the harness | Models are capable; context and harness are the differentiator |
 | Context > model upgrade | Fix the harness before reaching for a bigger model |
 | Match model to task | Top tier for orchestration and judgment; mid for routine; cheap for mechanical |
 | Keep questioning the harness | Re-evaluate scaffolding as models improve |

@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Consistency pass
+
+Changed:
+- Cut the "Trust the harness" Quick Reference row from 001 — orphaned by the v2 restructure and redundant against two neighbouring rows
+- 001's "verification beats execution" now points at 002 rather than restating its argument
+- Scoped 002's fresh-context-reviewer claim so it no longer reads as contradicting the held-out oracle as the strongest single practice
+
+Audited clean: British spelling across all files, SKILL.md routing rows
+against actual headings, every internal link, and thresholds in chronicle
+bodies. The one remaining specific — "React 18" in 001 — is an illustrative
+example of how to write a stack line, not a claim about tooling.
+
 ### 2026-08-09 — Templates
 
 Added:

@@ -97,7 +97,7 @@ Assume some of it gets through anyway. What catches it:
 
 **Watch for the tells.** Assertions that got weaker. New try/except with an empty or logging-only handler. Skip markers. Literal values in return statements that match test expectations. Mocks introduced into tests that were previously integration-level. Configuration changes to the test runner in a code PR.
 
-**Use a reviewer with no shared context.** The reviewing agent from 001 works here too, and it's better at this than a held-out suite is — it can read intent and spot that a function is shaped like a lookup table, which no test will tell you. Give it the spec and the diff, not the implementing session's reasoning.
+**Use a reviewer with no shared context.** The reviewing agent from 001 works here too, and at this particular job it beats a held-out suite — it can read intent and spot that a function is shaped like a lookup table, which no test will tell you. Give it the spec and the diff, not the implementing session's reasoning.
 
 **Ask for the reasoning, then check it against the diff.** An agent that took a shortcut will often describe it plainly if asked directly what it did to make the test pass. The narration is unreliable as evidence and quite useful as a lead.
 
