@@ -9,6 +9,22 @@ An evergreen collection on **agentic software engineering**: what has held up ac
 - **[001 — Effective Agent Workspace Setup](chronicles/001-effective-agent-workspace-setup.md)** — The mental model, context as a finite budget, `CLAUDE.md` and `AGENTS.md`, skills, hooks, when to reach for MCP servers and plugins, scaling from one agent to many, permissions and sandboxing, and cross-session state. Assumes nothing; start here.
 - **[002 — Verification in the Agentic Loop](chronicles/002-verification-in-the-agentic-loop.md)** — Why a passing test suite is weaker evidence when an agent wrote the code, the routes agents take to green without solving the problem, held-out oracles, and what detection actually catches. Assumes 001.
 
+## Run it rather than trust it
+
+Where a chronicle makes a mechanical claim, [`examples/`](examples/) lets you check it:
+
+```sh
+cd examples/verification && ./run.sh
+```
+
+Ten seconds, and you watch a green test suite hide three real bugs in a user-creation function — duplicate accounts for the same person, and a password policy that is silently 8 characters instead of the documented 12. Every route to green in 002's taxonomy is reproduced, including the one that needs no agent at all: a failing suite reporting exit 0 because someone piped it through `tee`.
+
+## How claims are handled
+
+Every statement of external fact has a dated, verifiable source in [`CHANGELOG.md`](CHANGELOG.md), with vendor-published evidence flagged as such. Claims that couldn't be sourced are listed there as unsourced rather than quietly dropped — currently two.
+
+Chronicle bodies carry no citations by design; they're meant to be read, not audited. The audit trail is the changelog.
+
 ## Install as a skill
 
 The chronicles are readable on their own, but `SKILL.md` lets an agent route to the relevant section and apply it to the workspace in front of it:
@@ -28,7 +44,7 @@ It triggers on setup, context, and verification work — reviewing a context fil
 
 Pull requests welcome for principles that have held across multiple model generations, or patterns with concrete adoption behind them. Speculation, marketing claims, and untested wisdom belong in [Discussions](../../discussions), not the chronicles.
 
-Claims asserting external facts need a dated, verifiable source in [`CHANGELOG.md`](CHANGELOG.md). Chronicle bodies carry no citations by design.
+The most useful contribution is a claim that doesn't hold. If an example stops reproducing what it demonstrates, or you can show a chronicle is wrong, that's worth more than an addition.
 
 ## License
 

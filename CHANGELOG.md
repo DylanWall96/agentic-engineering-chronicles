@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Runnable examples
+
+Added:
+- `examples/verification/` — every mechanical claim in 002 as executable Go, with `run.sh` producing the whole demonstration in about ten seconds
+- `examples/README.md` — examples are for checking, not copying, and unlike templates are not expected to rot
+- README sections surfacing the examples and the sourcing discipline, which were previously only visible to someone who opened this file
+
+The chronicles argue that observed behaviour beats assertion. Until now the
+repo asked to be taken on faith. Results, all reproduced rather than written
+by hand: a fitted implementation passing its working suite and failing a
+held-out suite three ways; all seven cheat patterns producing genuinely green
+suites; and a failing suite reporting exit 0 through a pipe.
+
 ### 2026-08-09 — Chronicle 002: qualify the property-testing claim
 
 Added:

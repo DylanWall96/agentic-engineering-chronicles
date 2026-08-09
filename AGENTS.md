@@ -12,6 +12,7 @@ It is also installable as a skill (`SKILL.md`), so changes to structure or filen
 
 - `chronicles/` — numbered, self-contained documents. The durable material.
 - `templates/` — copyable artefacts (context files, hooks, settings). Explicitly dated and expected to rot.
+- `examples/` — runnable demonstrations of mechanical claims. Not for copying; for checking.
 - `CHANGELOG.md` — dated sources backing claims made in the chronicles.
 - `SKILL.md` — routing layer for agents applying the chronicles elsewhere.
 

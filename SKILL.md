@@ -24,6 +24,7 @@ Read only what the task needs. Each chronicle is self-contained prose; the templ
 | Setting up tests for agent-written code | `chronicles/002-verification-in-the-agentic-loop.md` |
 | Reviewing a large agent-authored diff | `chronicles/002` — *Detection* |
 | Finding that tests pass but behaviour is wrong | `chronicles/002` — *How Agents Cheat* |
+| Unconvinced that any of 002 is real | `examples/verification/` — run it |
 
 Chronicle 002 assumes 001. If the user is starting from nothing, 001 first.
 
