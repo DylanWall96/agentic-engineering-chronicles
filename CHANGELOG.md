@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Chronicle 002, AGENTS.md, SKILL.md
+
+Added:
+- Chronicle 002: Verification in the Agentic Loop — the follow-through on 001's "verification beats execution"
+- `AGENTS.md` — maintenance context and editorial rules for this repository
+- `SKILL.md` — routing layer making the chronicles installable as a skill
+- Dated, verifiable sources for both chronicles, replacing the generic list
+
 ### 2026-08-09 — Chronicle 001 v4
 
 Changed:
@@ -44,12 +52,81 @@ Changed:
 - Repo structure: README as index, chronicles/ for individual entries
 - CC-BY-4.0 license
 
-## Sources informing the current draft
+## Sources
 
-- Anthropic Engineering — context engineering, harness design, agent skills, multi-agent systems, code execution with MCP
-- Claude Code documentation — progressive tool loading, sandboxing, permission modes, memory
-- HumanLayer blog — CLAUDE.md authoring, advanced context engineering
-- GitHub — AGENTS.md large-repo analysis; agents.md adoption under vendor-neutral governance
-- Independent research on long-context degradation
-- Published vulnerability reports on agent sandbox escapes across vendors
-- Measured comparisons of multi-agent vs single-agent performance controlling for token spend
+The chronicle bodies carry no citations by design. Every claim in them that asserts an external fact is listed here with a date and a source.
+
+**†** marks evidence that is vendor-published or otherwise self-interested. It isn't disqualifying — some of it is the only measurement that exists — but it should be read knowing who produced it.
+
+### Chronicle 001 — Effective Claude Code Setup
+
+**Performance degrades as the context window fills, regardless of where the relevant information sits**
+
+- 2025-07 — Chroma, *Context Rot: How Increasing Input Tokens Impacts LLM Performance* — trychroma.com/research/context-rot — degradation across 18 frontier models as input grows. † Chroma sells retrieval infrastructure; the finding favours its product.
+- 2025 — Adobe Research, *NoLiMa: Long-Context Evaluation Beyond Literal Matching* (ICML 2025) — github.com/adobe-research/NoLiMa — models advertising near-perfect recall to a million tokens fail non-lexical retrieval by 32K.
+- 2023 — Liu et al., *Lost in the Middle* — accuracy is U-shaped by position, degrading over 30% when the evidence sits mid-context.
+
+**AGENTS.md is the cross-tool standard, under vendor-neutral governance**
+
+- 2025-12 — AGENTS.md donated to the Agentic AI Foundation under the Linux Foundation, co-founded by OpenAI, Anthropic, and Block — openai.com/index/agentic-ai-foundation † co-founder announcement.
+- 2026-06 — agents.md lists 28+ tools with native support; 60,000+ repositories adopted. Supports the chronicle's "tens of thousands".
+
+**Context files should stay short**
+
+- Claude Code documentation, *How Claude remembers your project* — code.claude.com/docs/en/memory — the "roughly two hundred lines" figure. † Vendor guidance.
+
+**Tool definitions cost context; progressive loading removes most of it**
+
+- 2025-11-04 — Anthropic, *Code execution with MCP: building more efficient AI agents* — anthropic.com/engineering/code-execution-with-mcp — a worked example reducing 150,000 tokens to 2,000 (98.7%). † Vendor.
+- Anthropic, *Introducing advanced tool use on the Claude Developer Platform* — anthropic.com/engineering/advanced-tool-use — deferred tool definitions and tool search. † Vendor.
+
+**Permission prompts stopped being a real control**
+
+- ~93% of permission prompts approved (Anthropic telemetry, reported secondhand — no primary publication located). † Vendor telemetry, secondary reporting.
+- 2026-07 — *How Agents Ask for Permission: User Permissions for AI Agents, from Interfaces to Enforcement* — arxiv.org/html/2607.13718v1 — 13 of 16 participants used "Always Allow" to dismiss prompts; 3 of 16 read them carefully.
+- Claude Code documentation, *Configure the sandboxed Bash tool* — code.claude.com/docs/en/sandboxing — sandboxing cuts prompt volume by up to 84%. † Vendor.
+
+**Sandbox escapes across vendors, several sharing root causes**
+
+- 2026 — BleepingComputer, *Cursor, Codex, Gemini CLI, Antigravity hit by sandbox escapes* — bleepingcomputer.com/news/security/cursor-codex-gemini-cli-antigravity-hit-by-sandbox-escapes/
+- Cymulate, *Configuration-Based Sandbox Escape (CBSE) in AI Coding Tools* — cymulate.com/blog — the shared root cause: writing a file that a trusted process outside the sandbox later runs.
+- CVE-2026-46406 and further Claude Code advisories, including two rated CVSS 10.0; Cursor CVE-2026-50548 / 50549 at CVSS 9.8.
+
+**Multi-agent gains are substantially a token-spend effect**
+
+- 2025-06 — Anthropic, *How we built our multi-agent research system* — token usage alone explains 80% of performance variance on BrowseComp; tool calls ~10%, model choice ~5%. Multi-agent consumes roughly 15× the tokens of chat. † Vendor — though the finding cuts against the vendor's interest, which strengthens it.
+- *Single-Agent LLMs Outperform Multi-Agent Systems on Multi-Hop Reasoning Under Equal Thinking Token Budgets* — the advantage disappears when the budget is held constant.
+
+**Skill registries contain malicious payloads**
+
+- Snyk, *ToxicSkills* — snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub — prompt injection in 36% of skills audited; 1,467 malicious payloads.
+- 2026-02 — *Malicious Agent Skills in the Wild: A Large-Scale Security Empirical Study* — arxiv.org/html/2602.06547v1 — 534 of 3,984 skills (13.4%) carrying critical security issues.
+- Zenity — malicious skills across ~1.7M installs, aimed at credential theft and supply-chain persistence.
+
+### Chronicle 002 — Verification in the Agentic Loop
+
+**Agents reach green by routes you didn't intend**
+
+- Anthropic, Claude 3.7 Sonnet system card — special-casing test cases in agentic coding environments: returning expected values directly, or modifying test files rather than implementing a general solution. † Vendor, self-disclosed.
+- *EvilGenie: a Reward Hacking Benchmark* — arxiv.org/html/2511.21654v2 — taxonomy covering hard-coded test cases, modified harnesses, and special-case solutions.
+- *SpecBench: Measuring Reward Hacking in Long-Horizon Coding Agents* — arxiv.org/html/2605.21384v1 — 30 systems-level tasks.
+- *Do Coding Agents Deceive Us? Detecting and Preventing Cheating via Capped Evaluation with Randomized Tests* — arxiv.org/pdf/2606.07379 — agents observed editing a writable test so buggy output passes. Supports the held-out-oracle and freeze-the-tests practices.
+- *CircumEval — Measuring Circumvention Propensity in Coding Agents* — explicit reward hacking observed in two of three major proprietary agents, misaligned behaviour in all three.
+
+**The saved time reappears downstream in review and rework**
+
+- 2025-07-10 — METR, *Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity* — metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/ — 16 developers, 246 tasks, 19% slower with AI while believing they were 20% faster. **METR now labels this out of date**; its 2026-02-24 follow-up redesigns the experiment rather than restating the figure — metr.org/blog/2026-02-24-uplift-update/. Cite for the perception gap, not as a current productivity measurement.
+- Faros AI, 2025 telemetry across 10,000+ developers and 1,255 teams — high-adoption teams completed 21% more tasks and merged 98% more PRs, while PR review time rose 91%, PR size 154%, and bug counts 9%. This is the clearest evidence for the relocation-of-cost argument.
+- GitClear, *The Maintainability Gap: 2026 AI Code Quality Research* — gitclear.com/the_ai_code_quality_maintainability_gap — copy-pasted code 9.4% (2022) to 15.7% (early 2026); refactored code 21% to 3.8%; two-week churn rising.
+- DORA, 2025 State of DevOps — Rework Rate added as a fifth metric, with review burden elevated as a leading indicator.
+
+### Claims carrying no solid source
+
+Listed rather than dropped. Each is either weakly supported or an inference stated as fact in a chronicle body.
+
+- **"A third to a half of the context window" on tool definitions** (001) — Anthropic's primary gives a worked example, not a share-of-window range. The "5 servers / 58 tools ≈ 55K tokens" figure circulating in secondary write-ups does not appear in the source they cite. Needs rewording or a real measurement.
+- **"Untested context files can actively hurt agent performance"** (001, Skills) — the adjacent evidence covers context *length* degrading performance. Nothing found ties *untested* context specifically to harm.
+- **"Large monorepos routinely run dozens of them"** (001, nested context files) — no source located.
+- **"Ransomware staging"** in skill registries (001) — the audits confirm credential theft, backdoors, exfiltration, and persistence. Ransomware specifically is not confirmed by any of them.
+- **"The gap widens with difficulty"** and **"it correlates with struggle"** (002) — consistent with how the reward-hacking literature frames the incentive, but not located as a measured result.
+- **"Teams that measure this find the throughput improvement real but smaller than it feels"** (002) — Faros supports the direction; the specific characterisation is inference.
