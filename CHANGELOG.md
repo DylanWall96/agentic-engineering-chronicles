@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Chronicle 001 v4
+
+Changed:
+- MCP section: retired the context-budget argument for restraint. Progressive tool loading has largely dissolved it; the case is now accuracy and blast radius
+- Permission modes: reframed around *containment over supervision*, with measured approval rates as the reason prompts stopped being a real control, plus a sandbox-escape caveat
+- AGENTS.md: promoted from fallback to cross-tool standard, with Claude Code named as the exception
+- Code Mode: from "expect this to evolve toward" to "already shipping by default", scoped as an escape hatch rather than the front door
+- Quick Reference: replaced the tool-bloat and sandbox rows to match
+
+Added:
+- Auto-compaction as a genuine safety net — a floor, not a strategy
+- Built-in memory as complementary to version-controlled artefacts: convenient, but opaque and unreviewable
+- Inter-agent coordination channels — advisory, not a lock, contract, or merge queue
+- Multi-agent: token spend accounts for most of the measured single-vs-multi gap
+- Hooks survive compaction; instructions may not
+- Long-context degradation holds regardless of where the evidence sits in the window
+
 ### 2026-05-12 — Chronicle 001 v3
 
 Added:
@@ -29,8 +46,10 @@ Changed:
 
 ## Sources informing the current draft
 
-- Anthropic Engineering — context engineering, harness design, agent skills, multi-agent systems
-- Claude Code documentation
+- Anthropic Engineering — context engineering, harness design, agent skills, multi-agent systems, code execution with MCP
+- Claude Code documentation — progressive tool loading, sandboxing, permission modes, memory
 - HumanLayer blog — CLAUDE.md authoring, advanced context engineering
-- GitHub — AGENTS.md large-repo analysis
+- GitHub — AGENTS.md large-repo analysis; agents.md adoption under vendor-neutral governance
 - Independent research on long-context degradation
+- Published vulnerability reports on agent sandbox escapes across vendors
+- Measured comparisons of multi-agent vs single-agent performance controlling for token spend

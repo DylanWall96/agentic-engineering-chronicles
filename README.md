@@ -8,7 +8,7 @@ New chronicles are added as the field moves; existing ones are revised when the 
 
 ## Chronicles
 
-- [001 — Effective Claude Code Setup](chronicles/001-effective-claude-code-setup.md) — Mental model, context budgeting, `CLAUDE.md`, skills, plugins, tools/MCP, scaling from one agent to many, and workflow patterns.
+- [001 — Effective Claude Code Setup](chronicles/001-effective-claude-code-setup.md) — Mental model, context budgeting, `CLAUDE.md`, skills, hooks, when to reach for MCPs and plugins, scaling from one agent to many, permissions and sandboxing, cross-session state, and workflow patterns.
 
 ## Contributing
 

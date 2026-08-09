@@ -29,7 +29,7 @@ Every turn, Claude Code assembles its context window from a fixed set of compone
 - **System prompt** — the harness's built-in instructions. You don't control this directly, but it consumes a meaningful share of the budget.
 - **CLAUDE.md / AGENTS.md** — your persistent project context. Loaded on every turn.
 - **Skills** — names and descriptions of every available skill are loaded into the system prompt at startup. Skill bodies and bundled files load only when invoked.
-- **Tool definitions** — every tool exposed (built-in, MCP, custom) has its schema loaded into context before any work begins.
+- **Tool definitions** — every tool exposed (built-in, MCP, custom) has its schema loaded into context before any work begins, unless the harness defers them until needed.
 - **Codebase** — files the agent has read this session.
 - **Conversation history** — your messages and the agent's previous turns and tool results.
 
@@ -41,7 +41,9 @@ The rest of this guide is about managing each of these components deliberately.
 
 ## Context as a Finite Budget
 
-Performance degrades as the context window fills. This is consistent across every frontier model that has been tested. The practitioner consensus has converged on a hard rule:
+Performance degrades as the context window fills. This is consistent across every frontier model that has been tested, and it holds independently of where in the window the relevant information sits — a model degrades on long input even when the evidence it needs is placed favourably. Effective working limits are routinely well below advertised window sizes.
+
+The practitioner consensus has converged on a hard rule:
 
 **Cap context utilisation well below the auto-compaction trigger.** Compact, clear, or hand off at task boundaries rather than letting the limit drive it. This pattern is sometimes called Frequent Intentional Compaction.
 
@@ -50,6 +52,8 @@ Performance degrades as the context window fills. This is consistent across ever
 - Fresh context beats summarised context. Compaction always loses information; the question is whether you control what's lost or the auto-compactor does.
 - Compacting at task boundaries preserves coherent units. Compacting mid-implementation loses ongoing decisions.
 - Larger context windows raise the ceiling but the degradation curve still applies. A massive context window does not give you a massive amount of clean reasoning.
+
+Automatic context management has improved considerably and is now a genuine safety net rather than a last resort — some harnesses compact server-side without being asked. Treat it as a floor, not a strategy. The evidence still favours deliberate context management over letting the window fill and hoping the compactor picks well.
 
 **Operating rules:**
 
@@ -83,17 +87,19 @@ Your persistent project context. Most setups support generating a starter from t
 
 **Practical limits:**
 
-- Keep it tight. Frontier models reliably follow a finite number of instructions; the harness already consumes a chunk of that budget. Every line you add costs you adherence elsewhere. Targeting a few hundred lines or fewer is a good discipline.
+- Keep it tight. Frontier models reliably follow a finite number of instructions; the harness already consumes a chunk of that budget. Every line you add costs you adherence elsewhere. Targeting a few hundred lines or fewer is a good discipline — vendor guidance has converged on roughly two hundred.
 - For sections that should only fire on specific tasks, use conditional wrappers. Make the conditions narrow. Don't wrap project identity, structure, or stack — those are always relevant.
 - Don't auto-generate the file and leave it alone. Starter generators produce comprehensive output that almost always needs trimming.
 - Don't `@`-mention large reference docs. That embeds the file every turn. Instead, tell the agent when to read it: "For complex Foo usage or if you encounter `FooBarError`, see `path/to/docs.md`."
-- Use subdirectory variants in monorepos so package-specific context only loads in the relevant subtree.
+- Use subdirectory variants in monorepos so package-specific context only loads in the relevant subtree. Nesting resolves nearest-file-first; large monorepos routinely run dozens of them.
 - Lazy-load rules that only apply to certain file paths.
 - Use deterministic settings for harness-enforced behaviour, not CLAUDE.md. If a rule can be enforced by tooling, enforce it by tooling.
 
 **The test:** any new contributor should be able to launch Claude Code and ask "run the tests" and have it work first try. If it doesn't, your context file is missing essential setup or build commands.
 
-**AGENTS.md** is the cross-tool standard. Many setups read it as a fallback when no Claude-specific file is present. For mixed-tool teams, the practical pattern is an `AGENTS.md` with universal rules and a thin Claude-specific file that imports it and adds Claude-specific behaviour. Don't duplicate code-style rules across both.
+**AGENTS.md is now the cross-tool standard, not merely a fallback.** It is governed by a vendor-neutral foundation, adopted across tens of thousands of repositories, and read natively by most major agent harnesses. Claude Code remains a notable exception, reading its own file by default.
+
+The practical pattern for any team using more than one tool — which is most teams — is to make `AGENTS.md` the source of truth holding the universal rules, and keep a thin Claude-specific file that imports it and adds only Claude-specific behaviour. An import directive or a symlink both work. Don't duplicate rules across both; a rule that exists in two files will disagree with itself within a month.
 
 ---
 
@@ -101,7 +107,7 @@ Your persistent project context. Most setups support generating a starter from t
 
 Skills are reusable, on-demand capabilities. Each skill is a folder with a `SKILL.md` and optional bundled files. They use **progressive disclosure**: only the skill's name and description are loaded into the system prompt at all times; the body and any bundled `references/` or `scripts/` only load when the agent decides to use the skill.
 
-User-invoked commands and model-invoked skills increasingly share the same primitive — defining a skill often gives you a slash command for free.
+User-invoked commands and model-invoked skills increasingly share the same primitive — defining a skill often gives you a slash command for free. The format has also converged across harnesses, so a well-written skill is increasingly portable rather than locked to one tool.
 
 ### When to use skills
 
@@ -128,6 +134,7 @@ The agent needs to see what a "good run" looks like before you can codify it. Pr
 ### Recursive improvement
 
 When a skill fails:
+
 1. Ask the agent why it failed.
 2. Have it diagnose the specific error.
 3. Update the `SKILL.md` based on what was learned.
@@ -164,7 +171,7 @@ Use hooks for things that must always happen, not things you'd like to happen:
 
 The mental model: skills capture knowledge the agent should reach for; hooks enforce invariants the agent cannot break. They're complementary, not competing — most serious setups use both.
 
-Hooks belong in your context file's territory of *deterministic enforcement*. Anything you've been tempted to write as "never do X" or "always do Y" in CLAUDE.md is probably better expressed as a hook. The instruction can be ignored under context pressure; the hook cannot.
+Hooks belong in your context file's territory of *deterministic enforcement*. Anything you've been tempted to write as "never do X" or "always do Y" in CLAUDE.md is probably better expressed as a hook. The instruction can be ignored under context pressure; the hook cannot. This matters most after compaction, when the instruction may no longer be in the window at all — a hook can't be talked out of it or forget it.
 
 Hooks aren't a security boundary — a sufficiently determined prompt injection can find ways around them, and the script itself runs with whatever permissions you give it. But for the everyday case of "I want this thing to happen reliably," hooks are the only layer of the stack that gives you *reliably*.
 
@@ -194,13 +201,13 @@ When MCPs are usually not worth it:
 - Your own codebase — the agent has the filesystem already.
 - Your own services — the agent can read the handler code and call the API directly.
 - Stateless API surfaces where a well-written CLI works just as well. Most public APIs fall into this bucket.
-- Anything you'd add "just in case." Tool definitions cost context every turn, regardless of whether they're used.
+- Anything you'd add "just in case."
 
-**Treat MCPs as a context-budget item, not a feature checklist.** Tool definitions get loaded into context on every turn, before the agent does any work. Three thoughtfully chosen servers will leave the agent room to think; ten will starve it. Real configurations have been measured consuming nearly half the context window on tool definitions alone before any task begins. If your harness lets you defer tool definitions until needed (sometimes called tool search or progressive loading), turn it on.
+**The context-budget argument has weakened; the focus argument hasn't.** Untamed tool surfaces genuinely could consume a third to a half of the context window on definitions alone before any work began. That was the strongest case for restraint, and progressive tool loading has largely dissolved it — most harnesses now defer tool definitions until the agent searches for one, triggering automatically once the tool surface passes a fraction of the window, and cutting the standing cost by the large majority. Turn it on. Below a handful of tools, loading everything upfront is still faster.
 
-The ecosystem is also moving from "load every tool definition upfront" to "let the agent write code against a typed SDK and execute it in a sandbox" — a pattern variously called Code Mode or code-execution-with-MCP. Expect MCPs you adopt today to evolve toward this model. Servers that already work this way (a single `search` and `execute` interface backed by a typed API) cost a fraction of the context of traditional tool-registry MCPs.
+What that changes: the ceiling on how many servers you can install without starving the agent rises considerably. What it doesn't change: every additional tool is another thing the agent can pick wrongly, and another dependency with its own blast radius. Restraint is now a question of accuracy and security rather than tokens. A handful of MCPs per project remains a reasonable ceiling, but pick them for what you actively develop against, not for what fits in the budget.
 
-A handful of MCPs per project is a reasonable ceiling. Pick the ones that match systems you actively develop against; skip the rest.
+The ecosystem has also moved from "load every tool definition upfront" to "let the agent write code against a typed SDK and execute it in a sandbox" — a pattern variously called Code Mode or code-execution-with-MCP. This is now shipping on by default in places rather than emerging. The consensus on where it belongs: an escape hatch for workflows with many tools or large responses, not the front door for the common path. Keep a curated set of tools for what you do every day.
 
 For everything else — agentic search over RAG-first patterns, treating tool servers as microservices with per-project credentials, read-only modes, audit logs, secrets in a vault — the same hygiene applies as it does to any external dependency.
 
@@ -243,7 +250,7 @@ The dominant pattern from people who ship a lot with coding agents is:
 
 1. **Plan first.** Don't let the agent write a line of code until the plan is approved. Iterate on the plan. Ask "what are the flaws in this plan?" Ask the agent to challenge its own assumptions.
 2. **Auto-accept once the plan is good.** A solid plan one-shots the implementation almost every time.
-3. **Use a managed permission mode for daily work** rather than blanket permission-skipping. Modern agent harnesses include automated permission modes that probe inputs and review outputs for unsafe patterns. Pair them with sandboxing for anything touching real systems.
+3. **Use a managed permission mode for daily work** rather than blanket permission-skipping. See below.
 
 ### Stage 2 — Subagents for context isolation
 
@@ -269,14 +276,16 @@ Multi-agent orchestration becomes useful when:
 Pre-conditions before adopting:
 
 - You have evals to know whether the multi-agent setup is actually doing better than a single agent.
-- The task value justifies it. Multi-agent setups burn token budget linearly with team size, plus coordination overhead.
+- The task value justifies it. Multi-agent setups burn token budget linearly with team size, plus coordination overhead. Where this has been measured, token spend alone accounts for most of the performance difference between multi-agent and single-agent setups — some of what looks like an architecture win is a budget win, and it's worth checking which one you're buying.
 - You're consistently running three or more agents per task.
 
 ### When parallel multi-agent works, and when it doesn't
 
 The reference case for unstructured parallel multi-agent (running many agents at once with no orchestrator) is work that **decomposes into many independent verifiable subtasks**. Give each agent a distinct failing test and a known-good oracle, and they can converge on the answer.
 
-Parallel multi-agent **stalls** when work converges — when every agent ends up fixing the same bug and overwriting each other. For continuous builds, the better pattern is structured: a planner agrees on a contract, a generator builds against it, an evaluator verifies the output before accepting it.
+Parallel multi-agent **stalls** when work converges — when every agent ends up fixing the same bug and overwriting each other. Reading parallelises cleanly; writing creates conflicts that only shared context prevents. For continuous builds, the better pattern is structured: a planner agrees on a contract, a generator builds against it, an evaluator verifies the output before accepting it.
+
+**Parallel agents need a coordination channel, or the only channels are the filesystem and you.** Harnesses are starting to provide one directly — a way for one running session to pass a finding, a status, or a decision to another, so a breaking change discovered in one place reaches the sessions it affects without you relaying it between terminals. Where it exists, use it; it raises the number of parallel agents that stay workable. But treat it as advisory rather than structural. A message is a suggestion the receiving agent may or may not act on well. It isn't a lock, a contract, or a merge queue, and it doesn't make unstructured parallelism safe for convergent work.
 
 For most teams, single-agent + plan mode + auto-accept beats both.
 
@@ -284,12 +293,16 @@ For most teams, single-agent + plan mode + auto-accept beats both.
 
 ## Permission Modes and Sandboxing
 
-Unrestricted automation flags are being phased out for daily use in favour of:
+Blanket permission-skipping has been superseded for daily use by two things that now ship as defaults rather than aspirations:
 
-- **Managed permission modes.** Multi-layer defence that probes tool calls before they fire and reviews outputs after, pausing on suspicious patterns.
-- **Sandboxing.** Run the agent's actions inside a container or VM where the blast radius is limited.
+- **Managed permission modes.** Rather than approving every action, a classifier screens each tool call for the patterns that actually matter — mass deletion, credential exfiltration, malicious execution — auto-approving routine work and surfacing only what warrants a look. This exists because the approval prompt had stopped being a real control: measured approval rates on permission prompts run into the nineties, which is a rubber stamp with extra steps.
+- **Sandboxing at the OS level.** Run the agent's actions where the blast radius is bounded — a container, a VM, or OS-level isolation primitives. This is now standard, open-source, and cuts prompt volume dramatically by making most actions safe to allow.
 
-Practical rule: never run unrestricted agent automation on a workstation that has access to credentials you'd care about losing. Either sandbox the actions, or confirm them.
+The shift underneath both is from *supervision* to *containment*: constrain what the agent **can** do rather than reviewing each thing it **does**. Supervision degrades with volume; containment doesn't.
+
+Sandboxes are boundaries, not guarantees. A steady stream of sandbox-escape vulnerabilities has hit agent tooling across every major vendor, several sharing the same root causes. Keep the tooling current and assume the boundary can fail.
+
+Practical rule, unchanged and strengthened: never run unrestricted agent automation on a workstation that has access to credentials you'd care about losing. Either sandbox the actions, or confirm them.
 
 ---
 
@@ -314,6 +327,8 @@ A few principles:
 
 Build small read-side helpers — slash commands or subagents that find and re-attach relevant prior artefacts — once you have enough of them to need indexing.
 
+**Built-in memory is complementary, not a replacement.** Harnesses now offer automatic persistence that carries facts across sessions without you writing anything down. It's useful, and it removes some of the friction. It is also opaque, unreviewable in a pull request, and outside version control — you can't diff it, another team member can't read it, and you can't tell what it decided to keep. Use it for convenience; keep the durable, decision-bearing material in the repo where a human can review it. Check what your provider does with it before putting anything sensitive in.
+
 ---
 
 ## Workflow Patterns
@@ -322,7 +337,7 @@ A handful of patterns that keep showing up in successful adoptions:
 
 **Plan-first.** Approval gates beat speed. The cost of iterating on a plan is tiny compared to the cost of iterating on a half-implemented feature.
 
-**Verification beats execution.** A large share of useful work is planning and review, not generation. Allocate accordingly.
+**Verification beats execution.** A large share of useful work is planning and review, not generation. Time saved writing code reappears downstream as time spent auditing it — the constraint moves rather than disappearing. Allocate accordingly.
 
 **Tracer-bullet PRs over horizontal phasing.** Break work into vertical slices that go end-to-end (DB + service + UI) rather than horizontal phases (all DB first, then all API, then all UI). Agents default to horizontal; correct them. Vertical slices give end-to-end signal early.
 
@@ -339,7 +354,7 @@ A handful of patterns that keep showing up in successful adoptions:
 ## Quick Reference
 
 | Principle | Action |
-|-----------|--------|
+| --- | --- |
 | Context is finite | Compact at task boundaries before the limit, prefer fresh sessions |
 | Less is more | Cut anything the model already knows |
 | Treat as new hire | Document what's specific to *your* project |
@@ -354,9 +369,9 @@ A handful of patterns that keep showing up in successful adoptions:
 | Plan first | Approve the plan before any code is written |
 | Verification > execution | Spend more time on plans and reviews than on generation |
 | Build your own | Generic skills are starters, custom skills are leverage |
-| Watch tool bloat | Tool definitions cost tokens before any work begins |
-| Cap tool servers | A handful per project is a reasonable ceiling |
-| Sandbox automation | Managed permissions plus sandbox for anything touching real systems |
+| Defer tool definitions | Turn on progressive tool loading; it removes most of the standing cost |
+| Cap tool servers | A handful per project — for accuracy and blast radius, not tokens |
+| Contain, don't supervise | Managed permissions plus sandbox; constrain what the agent *can* do |
 | Trust the harness | Models are capable; context and harness are the differentiator |
 | Context > model upgrade | Fix the harness before reaching for a bigger model |
 | Match model to task | Top tier for orchestration and judgment; mid for routine; cheap for mechanical |
