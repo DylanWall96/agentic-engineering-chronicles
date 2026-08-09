@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Chronicle 002: qualify the property-testing claim
+
+Added:
+- A qualifier to *Making Tests Hard to Game*: a property is only as strong as the inputs its generator samples
+- Quick Reference row for generator shape
+
+002 argued that properties resist accidental satisfaction because the agent
+cannot enumerate the inputs. That holds only where the generator reaches the
+failing cases. Walking the pattern through a worked example — user creation
+in Go, with an implementation that lowercased but never trimmed — a correct
+invariant with a stock string generator passed 500 cases against the broken
+code. The same invariant with a domain-shaped generator failed immediately.
+
+Found by running the pattern rather than re-reading it, which is the
+discipline the chronicles argue for.
+
 ### 2026-08-09 — Consistency pass
 
 Changed:

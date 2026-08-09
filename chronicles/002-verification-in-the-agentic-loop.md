@@ -81,6 +81,8 @@ Practical notes:
 
 **Prefer properties over examples.** "Reversing twice returns the original" is hard to fake. "reverse([1,2,3]) == [3,2,1]" is a lookup table with three entries. Property-based tests generate their own inputs, which means the agent can't enumerate what it needs to satisfy. Where a property exists, it is worth several example tests.
 
+**But a property is only as strong as the inputs it samples.** The invariant being correct is not enough — the generator has to reach the cases where a wrong implementation shows. Default generators produce values shaped like the type, not values shaped like your domain, and they will happily run hundreds of cases past the bug you were trying to catch. A property with a stock generator can be exactly as hollow as an example test, with more ceremony. Write the generator to produce inputs that look like your real ones: the awkward casing, the surrounding whitespace, the empty collection, the boundary.
+
 **Make tests structurally hard to modify.** A hook that blocks writes to test paths during implementation turns a probabilistic instruction into an invariant — this is exactly the case 001 describes for deterministic enforcement. If the agent needs a test changed, it has to come back and ask, which is the conversation you wanted to have anyway.
 
 **Separate the test diff from the source diff.** Review them apart. Test changes in a large PR are where the interesting failures hide, and they're the first thing to read, not the last.
@@ -140,6 +142,7 @@ Scale it to consequence. A held-out suite for a payments path; a quick diff read
 | Criteria before code | Write acceptance criteria yourself, before the agent starts |
 | Red test as target | Hand over a failing test rather than a prose description |
 | Properties over examples | Invariants are much harder to satisfy accidentally |
+| Generators need domain shape | A stock generator can miss the bug for hundreds of cases |
 | Freeze the tests | Block writes to test paths during implementation with a hook |
 | Read the test diff first | Test changes in an implementation PR are where failures hide |
 | Struggle is the signal | Scrutinise hardest where the agent took the most attempts |
