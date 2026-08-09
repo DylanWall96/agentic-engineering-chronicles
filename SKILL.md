@@ -13,7 +13,7 @@ Read only what the task needs. Each chronicle is self-contained prose; the templ
 
 | If the user is... | Read |
 | --- | --- |
-| Setting up a new repository for agent work | `chronicles/001-effective-claude-code-setup.md` |
+| Setting up a new repository for agent work | `chronicles/001-effective-agent-workspace-setup.md` |
 | Reviewing or trimming an existing `CLAUDE.md` / `AGENTS.md` | `chronicles/001` — *CLAUDE.md and AGENTS.md* |
 | Hitting context limits, compacting often, losing state | `chronicles/001` — *Context as a Finite Budget*, *Cross-Session State* |
 | Writing a skill, or wondering whether to | `chronicles/001` — *Skills* |

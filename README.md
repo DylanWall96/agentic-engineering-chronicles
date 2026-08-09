@@ -8,7 +8,8 @@ New chronicles are added as the field moves; existing ones are revised when the 
 
 ## Chronicles
 
-- [001 — Effective Claude Code Setup](chronicles/001-effective-claude-code-setup.md) — Mental model, context budgeting, `CLAUDE.md`, skills, hooks, when to reach for MCPs and plugins, scaling from one agent to many, permissions and sandboxing, cross-session state, and workflow patterns.
+- [001 — Effective Agent Workspace Setup](chronicles/001-effective-agent-workspace-setup.md) — Mental model, context budgeting, `CLAUDE.md` and `AGENTS.md`, skills, hooks, when to reach for MCPs and plugins, scaling from one agent to many, permissions and sandboxing, cross-session state, and workflow patterns.
+- [002 — Verification in the Agentic Loop](chronicles/002-verification-in-the-agentic-loop.md) — Why a green test suite is weaker evidence when an agent wrote the code, how agents reach green without solving the problem, held-out oracles, and detection. Assumes 001.
 
 ## Contributing
 

@@ -1,6 +1,6 @@
-# Effective Claude Code Setup
+# Effective Agent Workspace Setup
 
-A working guide for individuals, teams, and companies adopting Claude Code. Focused on principles and patterns that hold up as the tooling evolves.
+A working guide for individuals, teams, and companies adopting AI coding agents. Focused on principles and patterns that hold up as the tooling evolves.
 
 ---
 
@@ -24,7 +24,7 @@ A working guide for individuals, teams, and companies adopting Claude Code. Focu
 
 ## What Makes Up the Context
 
-Every turn, Claude Code assembles its context window from a fixed set of components:
+Every turn, the harness assembles its context window from a fixed set of components:
 
 - **System prompt** — the harness's built-in instructions. You don't control this directly, but it consumes a meaningful share of the budget.
 - **CLAUDE.md / AGENTS.md** — your persistent project context. Loaded on every turn.
@@ -87,17 +87,17 @@ Your persistent project context. Most setups support generating a starter from t
 
 **Practical limits:**
 
-- Keep it tight. Frontier models reliably follow a finite number of instructions; the harness already consumes a chunk of that budget. Every line you add costs you adherence elsewhere. Targeting a few hundred lines or fewer is a good discipline — vendor guidance has converged on roughly two hundred.
+- Keep it tight. Frontier models reliably follow a finite number of instructions; the harness already consumes a chunk of that budget. Every line you add costs you adherence elsewhere. Targeting a few hundred lines or fewer is a good discipline, and vendor guidance has converged on the low end of that range.
 - For sections that should only fire on specific tasks, use conditional wrappers. Make the conditions narrow. Don't wrap project identity, structure, or stack — those are always relevant.
 - Don't auto-generate the file and leave it alone. Starter generators produce comprehensive output that almost always needs trimming.
 - Don't `@`-mention large reference docs. That embeds the file every turn. Instead, tell the agent when to read it: "For complex Foo usage or if you encounter `FooBarError`, see `path/to/docs.md`."
-- Use subdirectory variants in monorepos so package-specific context only loads in the relevant subtree. Nesting resolves nearest-file-first; large monorepos routinely run dozens of them.
+- Use subdirectory variants in monorepos so package-specific context only loads in the relevant subtree. Nesting resolves nearest-file-first.
 - Lazy-load rules that only apply to certain file paths.
 - Use deterministic settings for harness-enforced behaviour, not CLAUDE.md. If a rule can be enforced by tooling, enforce it by tooling.
 
-**The test:** any new contributor should be able to launch Claude Code and ask "run the tests" and have it work first try. If it doesn't, your context file is missing essential setup or build commands.
+**The test:** any new contributor should be able to start an agent and ask "run the tests" and have it work first try. If it doesn't, your context file is missing essential setup or build commands.
 
-**AGENTS.md is now the cross-tool standard, not merely a fallback.** It is governed by a vendor-neutral foundation, adopted across tens of thousands of repositories, and read natively by most major agent harnesses. Claude Code remains a notable exception, reading its own file by default.
+**AGENTS.md is now the cross-tool standard, not merely a fallback.** It is governed by a vendor-neutral foundation, adopted across a large and growing share of repositories, and read natively by most major agent harnesses. A few harnesses remain exceptions, reading their own file by default — check which yours does rather than assuming.
 
 The practical pattern for any team using more than one tool — which is most teams — is to make `AGENTS.md` the source of truth holding the universal rules, and keep a thin Claude-specific file that imports it and adds only Claude-specific behaviour. An import directive or a symlink both work. Don't duplicate rules across both; a rule that exists in two files will disagree with itself within a month.
 
@@ -153,7 +153,7 @@ A skill that ships scripts or references arbitrary files has the same blast radi
 3. Curated community sources from known maintainers.
 4. Arbitrary repositories on the open internet — review before enabling.
 
-Public skill registries have been found to contain malicious payloads, including credential theft and ransomware staging. Read every `SKILL.md` before enabling. Pay particular attention to bundled scripts and `allowed-tools` declarations. Skills that contain no executable code (instructions only) are roughly as risky as system-prompt content; skills that ship scripts are software you're choosing to run.
+Public skill registries have been found to contain malicious payloads, including credential theft, backdoors, and data exfiltration. Read every `SKILL.md` before enabling. Pay particular attention to bundled scripts and `allowed-tools` declarations. Skills that contain no executable code (instructions only) are roughly as risky as system-prompt content; skills that ship scripts are software you're choosing to run.
 
 ---
 
@@ -203,7 +203,7 @@ When MCPs are usually not worth it:
 - Stateless API surfaces where a well-written CLI works just as well. Most public APIs fall into this bucket.
 - Anything you'd add "just in case."
 
-**The context-budget argument has weakened; the focus argument hasn't.** Untamed tool surfaces genuinely could consume a third to a half of the context window on definitions alone before any work began. That was the strongest case for restraint, and progressive tool loading has largely dissolved it — most harnesses now defer tool definitions until the agent searches for one, triggering automatically once the tool surface passes a fraction of the window, and cutting the standing cost by the large majority. Turn it on. Below a handful of tools, loading everything upfront is still faster.
+**The context-budget argument has weakened; the focus argument hasn't.** Untamed tool surfaces genuinely could consume a large share of the context window on definitions alone before any work began. That was the strongest case for restraint, and progressive tool loading has largely dissolved it — most harnesses now defer tool definitions until the agent searches for one, triggering automatically once the tool surface passes a fraction of the window, and cutting the standing cost by the large majority. Turn it on. Below a handful of tools, loading everything upfront is still faster.
 
 What that changes: the ceiling on how many servers you can install without starving the agent rises considerably. What it doesn't change: every additional tool is another thing the agent can pick wrongly, and another dependency with its own blast radius. Restraint is now a question of accuracy and security rather than tokens. A handful of MCPs per project remains a reasonable ceiling, but pick them for what you actively develop against, not for what fits in the budget.
 
@@ -295,7 +295,7 @@ For most teams, single-agent + plan mode + auto-accept beats both.
 
 Blanket permission-skipping has been superseded for daily use by two things that now ship as defaults rather than aspirations:
 
-- **Managed permission modes.** Rather than approving every action, a classifier screens each tool call for the patterns that actually matter — mass deletion, credential exfiltration, malicious execution — auto-approving routine work and surfacing only what warrants a look. This exists because the approval prompt had stopped being a real control: measured approval rates on permission prompts run into the nineties, which is a rubber stamp with extra steps.
+- **Managed permission modes.** Rather than approving every action, a classifier screens each tool call for the patterns that actually matter — mass deletion, credential exfiltration, malicious execution — auto-approving routine work and surfacing only what warrants a look. This exists because the approval prompt had stopped being a real control: measured approval rates sit high enough that the prompt is a rubber stamp with extra steps.
 - **Sandboxing at the OS level.** Run the agent's actions where the blast radius is bounded — a container, a VM, or OS-level isolation primitives. This is now standard, open-source, and cuts prompt volume dramatically by making most actions safe to allow.
 
 The shift underneath both is from *supervision* to *containment*: constrain what the agent **can** do rather than reviewing each thing it **does**. Supervision degrades with volume; containment doesn't.

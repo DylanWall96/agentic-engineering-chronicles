@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Chronicle 001 v5: neutrality pass
+
+Changed:
+- Retitled to *Effective Agent Workspace Setup* and renamed the file; the chronicle number, which is the externally referenced part, is unchanged
+- Removed harness product names from the body — the guide is about agent workspaces, not one tool
+- Removed exact thresholds per the AGENTS.md editorial rule; the figures live in the sources section below
+- Corrected the skill-registry claim to what the audits actually confirm — credential theft, backdoors, and exfiltration, not ransomware staging
+
 ### 2026-08-09 — Chronicle 002, AGENTS.md, SKILL.md
 
 Added:
@@ -58,7 +66,7 @@ The chronicle bodies carry no citations by design. Every claim in them that asse
 
 **†** marks evidence that is vendor-published or otherwise self-interested. It isn't disqualifying — some of it is the only measurement that exists — but it should be read knowing who produced it.
 
-### Chronicle 001 — Effective Claude Code Setup
+### Chronicle 001 — Effective Agent Workspace Setup
 
 **Performance degrades as the context window fills, regardless of where the relevant information sits**
 
@@ -124,9 +132,6 @@ The chronicle bodies carry no citations by design. Every claim in them that asse
 
 Listed rather than dropped. Each is either weakly supported or an inference stated as fact in a chronicle body.
 
-- **"A third to a half of the context window" on tool definitions** (001) — Anthropic's primary gives a worked example, not a share-of-window range. The "5 servers / 58 tools ≈ 55K tokens" figure circulating in secondary write-ups does not appear in the source they cite. Needs rewording or a real measurement.
 - **"Untested context files can actively hurt agent performance"** (001, Skills) — the adjacent evidence covers context *length* degrading performance. Nothing found ties *untested* context specifically to harm.
-- **"Large monorepos routinely run dozens of them"** (001, nested context files) — no source located.
-- **"Ransomware staging"** in skill registries (001) — the audits confirm credential theft, backdoors, exfiltration, and persistence. Ransomware specifically is not confirmed by any of them.
 - **"The gap widens with difficulty"** and **"it correlates with struggle"** (002) — consistent with how the reward-hacking literature frames the incentive, but not located as a measured result.
 - **"Teams that measure this find the throughput improvement real but smaller than it feels"** (002) — Faros supports the direction; the specific characterisation is inference.
