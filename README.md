@@ -1,4 +1,4 @@
-# AI Chronicles
+# Agentic Engineering Chronicles
 
 > Working notes on building with AI coding agents. Principles and patterns over feature lists.
 
