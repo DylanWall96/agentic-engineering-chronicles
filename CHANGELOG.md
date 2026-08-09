@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Templates
+
+Added:
+- `templates/CLAUDE.md` and `templates/AGENTS.md` — annotated starters, commented so a reader knows what to cut
+- `templates/hooks/` — format after write, freeze test paths during implementation, block destructive commands
+- `templates/settings/` — permissions and sandboxing reflecting 001's containment posture, with annotations in a sibling README so the JSON stays strictly valid
+- `templates/README.md` — states plainly that templates are dated and expected to rot
+
+Hook and settings key names were checked against the harness documentation on
+2026-08-09 rather than written from memory. The one gap is recorded in
+`templates/settings/README.md`: only two `defaultMode` values were confirmed.
+
 ### 2026-08-09 — Chronicle 001 v5: neutrality pass
 
 Changed:
