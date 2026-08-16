@@ -2,6 +2,31 @@
 
 ## [Unreleased]
 
+### 2026-08-16 — An example for 001
+
+Added:
+- `examples/context-budget/` — `budget.sh` reports where the context window goes before any work begins; `redundant.sh` flags context-file lines the agent could have recovered itself. Bash only, no model calls
+- 001's header no longer reads "Runnable — nothing yet"
+
+001 was the last chronicle without a working example, and most of it cannot
+have one: context degradation, whether a context file helps, whether
+subagents beat a single agent all need model calls and many runs. What is
+demonstrable is the accounting, which is the part people skip.
+
+Unlike the other examples this is meant to be pointed at the reader's own
+repository rather than watched. On this repo it reports 6% of context-file
+lines as recoverable; on the bundled bloated fixture, 50%.
+
+Two limits are stated rather than hidden. Token counts are characters/4, not
+a real tokenizer, so they are honest as ratios and wrong as absolutes. And
+MCP tool-definition size cannot be read off disk — the script prints `?` and
+a server count instead of a number that would look authoritative and be made
+up.
+
+`redundant.sh` gets three lines of this repo's own `AGENTS.md` wrong, and the
+false positives were left in and documented. The check proposes; the reader
+decides.
+
 ### 2026-08-16 — A working eval, and the standard behind it
 
 Added:

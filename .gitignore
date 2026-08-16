@@ -1,5 +1,7 @@
 .DS_Store
 .claude/
+# ...but the example fixture's skills are part of the demonstration
+!examples/context-budget/fixtures/bloated/.claude/
 thoughts/
 *.log
 

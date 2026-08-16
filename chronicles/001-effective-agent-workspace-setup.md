@@ -2,7 +2,7 @@
 
 **Covers** — the foundation the other chronicles assume, and it is deliberately broad: how context works and how to budget it, context files, skills, hooks, when to reach for MCP servers and plugins, going from one agent to several, permissions and sandboxing, and carrying state between sessions.
 **Assumes** — nothing. Start here.
-**Runnable** — nothing yet. [`templates/`](../templates/) holds copyable versions of everything recommended below.
+**Runnable** — [`examples/context-budget/`](../examples/context-budget/), which measures where your context window actually goes and which lines of your context file the agent could have found itself. Point it at your own repo. [`templates/`](../templates/) holds copyable versions of everything recommended below.
 
 Most of what follows is practitioner consensus rather than measured result. That is worth stating at the top, because some of it has already failed to survive contact with evidence — noted where it happens. Chronicle 003 covers how you would tell the difference for your own setup.
 
