@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### 2026-08-16 — Format pass across all three chronicles
+
+Changed:
+- 001, 002 and 003 all carry a header block (covers / assumes / runnable), reference material as tables, and the artefacts they recommend shown inline rather than only described
+- 002: cheat taxonomy became a table with a third column — what catches each pattern — which did not exist anywhere before
+- 001: trust hierarchy stated once instead of twice; evals precondition and review-pass line now point at 003 and 002 rather than restating them
+- `AGENTS.md`: numbers a reader must act on belong in the body, and examples get built before the prose is finalised
+
+**Note for whoever considers splitting 001.** The question was whether it is one document or two. The churn record says two: every correction since v2 has landed in *CLAUDE.md and AGENTS.md*, *When to Reach Beyond the Basics*, or *Permission Modes and Sandboxing*, while *Mental Model*, *What Makes Up the Context*, *Context as a Finite Budget*, *Scaling* and *Workflow Patterns* have gone untouched across four months, three chronicles and a full sourcing pass.
+
+It was not split, for two reasons. The seam is not a line — *Skills*, *Hooks* and *Cross-Session State* each wrap durable argument around perishable mechanics, so a split cuts inside three sections rather than between them, making it a rewrite rather than a move. And 001's URL had already changed once that week.
+
+If you do split it: the inlined artefacts added in this pass — the context-file skeleton, the format hook and its wiring, the state directory layout, the permission and sandbox JSON — are the natural first thing to move. They were added knowing they increase the perishable content, because they make the chronicle usable on its own.
+
+The trigger to watch for is not simply another correction in those three sections. It is a correction that forces you to touch the durable half to keep the perishable half coherent. Until that happens, the coupling costs nothing.
+
 ### 2026-08-16 — Cohesion pass, workspace audit
 
 Changed:

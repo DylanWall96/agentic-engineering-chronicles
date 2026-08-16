@@ -39,9 +39,24 @@ These are the reason the repo is worth reading. Hold them.
 
 1. Confirm it isn't an expansion of an existing one in disguise.
 2. Open by naming what it follows from and what it assumes.
-3. Add its rows to the routing table in `SKILL.md`.
-4. Add its sources to `CHANGELOG.md`, dated.
-5. Add it to the chronicle list in `README.md`.
+3. **Build the example before finalising the prose**, wherever the chronicle makes a mechanical claim. See below.
+4. Add its rows to the routing table in `SKILL.md`.
+5. Add its sources to `CHANGELOG.md`, dated.
+6. Add it to the chronicle list in `README.md`.
+
+## Build the example first
+
+Where a claim can be demonstrated in code, write the demonstration before you write the paragraph, and let the prose describe what the example actually shows.
+
+This is not a style preference. Examples have corrected chronicles three times, always in the same direction — the prose overclaimed and the code disproved it:
+
+- 002 said property-based tests are hard to satisfy accidentally. A correct invariant with a stock generator passed five hundred cases against code known to be broken.
+- 003 said identical configurations compared over a handful of runs show "an apparent improvement of several points". The simulation put it in the tens of points.
+- 002 described a held-out suite as needing to sit outside the agent's tree, while its own example co-located one.
+
+Three for three suggests the failure is structural rather than careless. Prose written first describes the claim you believe; prose written after the demonstration describes the claim you can support. Write it in that order.
+
+If the example contradicts the chronicle, the chronicle is what changes. Never adjust an example to agree with prose.
 
 ## What to leave alone
 
