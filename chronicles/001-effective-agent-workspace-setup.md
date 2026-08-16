@@ -1,6 +1,8 @@
 # Effective Agent Workspace Setup
 
-A working guide for individuals, teams, and companies adopting AI coding agents. Focused on principles and patterns that hold up as the tooling evolves.
+**Covers** — the foundation the other chronicles assume, and it is deliberately broad: how context works and how to budget it, context files, skills, hooks, when to reach for MCP servers and plugins, going from one agent to several, permissions and sandboxing, and carrying state between sessions.
+**Assumes** — nothing. Start here.
+**Artefacts** — [`templates/`](../templates/) holds copyable versions of everything recommended below.
 
 Most of what follows is practitioner consensus rather than measured result. That is worth stating at the top, because some of it has already failed to survive contact with evidence — noted where it happens. Chronicle 003 covers how you would tell the difference for your own setup.
 
@@ -71,21 +73,25 @@ Automatic context management has improved considerably and is now a genuine safe
 
 Your persistent project context. Most setups support generating a starter from the codebase — use it, then edit aggressively.
 
-**Include:**
+| Include | Leave out | Why |
+| --- | --- | --- |
+| Stack with versions — "React 18, TypeScript, Vite, Tailwind" | "A React project" | The model knows React; it doesn't know which version you pin |
+| Non-obvious tooling — `task` not `make`, `bun test` not `npm test` | Every command imaginable | The surprising ones are the ones worth the tokens |
+| Structure, module boundaries, what is generated | A directory listing | It can `ls`; it cannot guess which directory is generated |
+| Conventions not visible in the code | Language or framework basics | Recoverable from training, or from one file read |
+| Safety rules — "never edit `/proto`", "migrations need review" | Code style | A linter enforces style deterministically; a model does not |
 
-- Tech stack with versions and key dependencies. "React 18 with TypeScript, Vite, and Tailwind" — not "React project."
-- Non-obvious tooling. "We use `task` not `make`." "Tests run via `bun test`."
-- Project structure, the boundaries between packages or modules, and where things live.
-- Naming conventions and patterns that aren't obvious from the code.
-- Safety-critical rules. "Never edit generated files in `/proto`." "Migrations require review."
-- The handful of commands the agent will need most often.
+The skeleton, from [`templates/CLAUDE.md`](../templates/CLAUDE.md):
 
-**Don't include:**
-
-- General language or framework knowledge the model already has.
-- Information the agent can recover cheaply with `find` and `grep` in a couple of file reads.
-- Code-style rules. Use linters and formatters with hooks instead — never send a model to do a linter's job.
-- Every command imaginable. Keep it tight.
+```text
+  # <Project>          one or two lines on what this is
+    Stack              versions and key dependencies
+    Commands           install, test, lint, build, run — the handful actually used
+    Structure          boundaries between packages; which directories are generated
+    Conventions        what isn't visible in the code. Not style — that's the linter's
+    Safety rules       short and specific. Prefer a hook wherever one can enforce it
+    Reference docs     point, don't embed: "if you hit FooBarError, read path/to/doc.md"
+```
 
 **Practical limits:**
 
@@ -150,12 +156,16 @@ Generic skills are fine starting points. The highest-leverage skills are the one
 
 ### Skills are third-party code
 
-A skill that ships scripts or references arbitrary files has the same blast radius as a plugin hook. Once enabled, it can execute on your machine on every relevant turn. Treat skills the way you'd treat any third-party dependency:
+A skill that ships scripts or references arbitrary files has the same blast radius as a plugin hook. Once enabled, it can execute on your machine on every relevant turn. Treat skills the way you'd treat any third-party dependency.
 
-1. Official vendor sources first.
-2. Plugins and skills published by the company whose system they integrate with.
-3. Curated community sources from known maintainers.
-4. Arbitrary repositories on the open internet — review before enabling.
+**The trust hierarchy**, which applies equally to skills, plugins, and tool servers:
+
+| Tier | Source | Posture |
+| --- | --- | --- |
+| 1 | Official, from the harness maintainer | Reasonable default |
+| 2 | Published by the company whose system it integrates with | Reasonable default |
+| 3 | Curated community sources, known maintainers | Read the manifest |
+| 4 | Arbitrary repositories on the open internet | Read everything, or don't enable it |
 
 Public skill registries have been found to contain malicious payloads, including credential theft, backdoors, and data exfiltration. Read every `SKILL.md` before enabling. Pay particular attention to bundled scripts and `allowed-tools` declarations. Skills that contain no executable code (instructions only) are roughly as risky as system-prompt content; skills that ship scripts are software you're choosing to run.
 
@@ -167,11 +177,36 @@ Skills, CLAUDE.md, and prompts are probabilistic guidance — the agent reads th
 
 Use hooks for things that must always happen, not things you'd like to happen:
 
-- Format and lint code after every write.
-- Block destructive commands before they run.
-- Run tests before allowing a commit.
-- Inject project-specific context at session start.
-- Notify external systems on session end.
+| Event | Hook | Blocks? |
+| --- | --- | --- |
+| After a file write | Format and lint it | No — advisory |
+| Before a shell command | Refuse destructive ones | Yes |
+| Before a write to a test path | Refuse it mid-implementation | Yes — see 002 |
+| At session start | Inject project context | No |
+| At session end | Notify an external system | No |
+
+Wiring, and the smallest hook worth having — [`templates/hooks/`](../templates/hooks/) has the rest:
+
+```json
+"hooks": {
+  "PostToolUse": [
+    { "matcher": "Edit|Write",
+      "hooks": [{ "type": "command",
+                  "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/format-after-write.sh" }] }
+  ]
+}
+```
+
+```sh
+# format-after-write.sh — runs the formatter the moment a file is written.
+file_path=$(jq -r '.tool_input.file_path // empty')
+case "$file_path" in
+  *.ts|*.tsx|*.js|*.json|*.css|*.md) prettier --write "$file_path" ;;
+  *.py)                              ruff format "$file_path" ;;
+  *.go)                              gofmt -w "$file_path" ;;
+esac
+exit 0   # advisory: formatting never blocks the write
+```
 
 The mental model: skills capture knowledge the agent should reach for; hooks enforce invariants the agent cannot break. They're complementary, not competing — most serious setups use both.
 
@@ -191,21 +226,23 @@ The serious practitioners shipping agentic-coding workflows in production take a
 
 The distinction matters. *Calling* a system is firing a request and parsing the response — `curl` handles that fine. *Developing against* a system means reading state, planning changes, making coherent updates, verifying, and iterating with the system's model in the agent's head while it works.
 
-MCPs earn their place in the second case. Strong examples:
+MCPs earn their place in the second case.
 
-- **Stripe** — building billing logic, reasoning about products and prices, configuring webhooks, verifying test charges. The agent benefits from the system's vocabulary, not just its endpoints.
-- **Terraform** — reasoning about state, planning changes, understanding resource dependencies. Far better than parsing `terraform plan` output.
-- **AWS and other cloud providers** — reasoning about resource graphs, IAM, networking, infrastructure relationships rather than calling individual endpoints.
-- **Databases with complex schemas** — structured introspection, type-aware queries, schema-aware migrations. Use read-only roles and never point at production.
-- **Browser automation** — there's no curl-equivalent for clicking, filling forms, or asserting on rendered output.
-- **Observability** — feeding live production telemetry (logs, traces, metrics, incidents) into the agent during a debugging session.
+| Worth a server | Why it beats a CLI |
+| --- | --- |
+| Billing and payments | Reasoning about products, prices and webhooks in the system's own vocabulary |
+| Infrastructure as code | State, planned changes, resource dependencies — better than parsing plan output |
+| Cloud providers | Resource graphs, IAM, networking as a model rather than as endpoints |
+| Databases with real schemas | Type-aware introspection and migrations. Read-only roles, never production |
+| Browser automation | There is no curl-equivalent for clicking and asserting on rendered output |
+| Observability | Live telemetry pulled into a debugging session as it happens |
 
-When MCPs are usually not worth it:
-
-- Your own codebase — the agent has the filesystem already.
-- Your own services — the agent can read the handler code and call the API directly.
-- Stateless API surfaces where a well-written CLI works just as well. Most public APIs fall into this bucket.
-- Anything you'd add "just in case."
+| Usually not worth it | Because |
+| --- | --- |
+| Your own codebase | The agent already has the filesystem |
+| Your own services | It can read the handler and call the API directly |
+| Stateless API surfaces | A well-written CLI does the same job. Most public APIs are here |
+| Anything added "just in case" | You will not remove it later, and it votes on every tool choice |
 
 **The context-budget argument has weakened; the focus argument hasn't.** Untamed tool surfaces genuinely could consume a large share of the context window on definitions alone before any work began. That was the strongest case for restraint, and progressive tool loading has largely dissolved it — most harnesses now defer tool definitions until the agent searches for one, triggering automatically once the tool surface passes a fraction of the window, and cutting the standing cost by the large majority. Turn it on. Below a handful of tools, loading everything upfront is still faster.
 
@@ -227,14 +264,7 @@ Reach for them when:
 
 Skip them when you're working solo or with a small team that can sync via the codebase. Plugins solve a distribution problem; if you don't have one, they add ceremony without benefit.
 
-**Trust hierarchy matters.** A plugin can execute arbitrary code on your machine. The reasonable order of trust, roughly:
-
-1. Official vendor marketplace published by the harness maintainer.
-2. Plugins published by the company whose system they integrate with (the people who run the service publishing their own plugin).
-3. Curated community marketplaces from known maintainers.
-4. Arbitrary repositories on the open internet.
-
-Treat the last tier the way you'd treat any unreviewed dependency. Read the manifest, look at the hooks and scripts, decide if you trust them.
+**A plugin can execute arbitrary code on your machine**, so the trust hierarchy under *Skills are third-party code* applies here unchanged. Read the manifest, look at the hooks and scripts, decide whether you trust them — and remember that "I installed it months ago" is not a review.
 
 ### The pattern
 
@@ -279,7 +309,7 @@ Multi-agent orchestration becomes useful when:
 
 Pre-conditions before adopting:
 
-- You have evals to know whether the multi-agent setup is actually doing better than a single agent.
+- You can tell whether the multi-agent setup is actually beating a single agent. Chronicle 003 covers what that takes, and the honest answer is more runs than most people expect.
 - The task value justifies it. Multi-agent setups burn token budget linearly with team size, plus coordination overhead. Where this has been measured, token spend alone accounts for most of the performance difference between multi-agent and single-agent setups — some of what looks like an architecture win is a budget win, and it's worth checking which one you're buying.
 - You're consistently running three or more agents per task.
 
@@ -304,6 +334,24 @@ Blanket permission-skipping has been superseded for daily use by two things that
 
 The shift underneath both is from *supervision* to *containment*: constrain what the agent **can** do rather than reviewing each thing it **does**. Supervision degrades with volume; containment doesn't.
 
+The posture, from [`templates/settings/`](../templates/settings/). The deny rules are the part worth keeping — everything else is convenience:
+
+```json
+"permissions": {
+  "defaultMode": "auto",
+  "deny": ["Read(./.env)", "Read(./secrets/**)", "Read(~/.aws/**)", "Read(~/.ssh/**)"],
+  "ask":  ["Bash(dangerouslyDisableSandbox:true)"]
+},
+"sandbox": {
+  "enabled": true,
+  "allowUnsandboxedCommands": false,
+  "network":     { "allowedDomains": ["github.com", "*.npmjs.org"] },
+  "credentials": { "envVars": [{ "name": "GITHUB_TOKEN", "mode": "deny" }] }
+}
+```
+
+Sandboxed commands write only to the working tree and the session temp directory unless you widen it. Start the network allowlist narrow; the agent prompts the first time it needs a domain you haven't granted. Deny rules hold regardless of permission mode, which is what makes them the durable part.
+
 Sandboxes are boundaries, not guarantees. A steady stream of sandbox-escape vulnerabilities has hit agent tooling across every major vendor, several sharing the same root causes. Keep the tooling current and assume the boundary can fail.
 
 Practical rule, unchanged and strengthened: never run unrestricted agent automation on a workstation that has access to credentials you'd care about losing. Either sandbox the actions, or confirm them.
@@ -316,10 +364,20 @@ The agent has no memory between sessions. Anything you want to carry forward —
 
 The pattern that's emerged across serious setups is a project-scoped, version-controlled directory of dated Markdown documents. Different teams use different names — `thoughts/`, `ai-docs/`, `decisions/`, a `CHANGELOG.md` at the root — but the structure is consistent:
 
-- A single root location, checked into the repo.
-- Subdirectories by artefact type: research, plans, decisions, postmortems.
-- Dated, descriptive filenames.
-- The agent reads these at the start of relevant sessions and writes new ones at phase boundaries.
+```
+docs/agent/                       one root location, checked into the repo
+  research/2026-08-14-auth-flow.md      what was found, and where
+  plans/2026-08-15-migrate-sessions.md  approved before implementation began
+  decisions/2026-08-15-no-orm.md        what was chosen, and what was rejected
+  postmortems/2026-08-16-token-leak.md  what broke and what changed after
+```
+
+Dated, descriptive filenames; subdirectories by artefact type; the agent reads these at the start of relevant sessions and writes new ones at phase boundaries. Point at it from your context file rather than `@`-mentioning it, so it loads when relevant instead of every turn:
+
+```markdown
+Before starting a feature, check `docs/agent/decisions/` for prior conventions.
+After a plan is approved or a debugging session resolves, write it up there.
+```
 
 This is what survives compaction. It's also what lets a fresh session pick up where a previous one left off — including a session run by a different team member, a different agent, or a future you who's forgotten the context.
 
@@ -349,7 +407,7 @@ A handful of patterns that keep showing up in successful adoptions:
 
 **Use deterministic tools wherever you can.** Linters, formatters, type checkers, hooks — never put their job in your context file or a skill if a tool can enforce it.
 
-**Run a clean review pass.** A reviewer subagent with fresh context catches things the writing agent missed because it can't see its own assumptions.
+**Run a clean review pass.** A reviewer subagent with fresh context catches things the writing agent missed, because it can't see its own assumptions. Chronicle 002 covers what to point it at.
 
 **Re-evaluate the harness as models improve.** Every component in your harness encodes an assumption about what the model can't do on its own — and those assumptions go stale as models improve. What needed scaffolding a year ago may not need it now.
 
