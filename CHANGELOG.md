@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### 2026-08-16 — Chronicle 003 and its example
+
+Added:
+- `chronicles/003-evals-for-your-own-harness.md` — the follow-through on 001's unkept "you have evals" precondition, scoped to evaluating the setup rather than its output
+- `examples/evals/` — the run-count argument as a deterministic simulation, no model calls, seeded and reproducible
+- Sources for 003, including the computed sample-size table and a note on why a published 30-runs figure was deliberately not used
+- A qualifier to 001: the benefit of a context file is not automatic
+
+Changed:
+- Retired the unsourced claim about untested context files, replaced by two sourced findings that are more precise and less flattering
+- Corrected 003 after the example contradicted it — identical configurations compared over five runs produce false margins in the tens of points, not "several points"
+
 ### 2026-08-09 — Faros 2026, hooks README
 
 Changed:

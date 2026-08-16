@@ -34,7 +34,7 @@ Nobody runs that many. Which means, stated plainly: **most before-and-after comp
 
 This is not counsel of despair. It redirects effort. Chase changes big enough to see. Prefer removing scaffolding, where the win is cost and simplicity and you need only show nothing got worse. Treat small measured improvements with suspicion proportional to how few runs produced them. And when the effect really is small, accept that you are choosing on grounds other than measured performance — cost, or simplicity, or taste — and say so, rather than dressing the preference up as a result.
 
-Beware the inverse most of all. Two genuinely identical configurations, compared over a handful of runs, will regularly produce an apparent improvement of several points in one direction. Not occasionally. Regularly. Every practitioner who has ever declared a config change a success on the strength of three runs has generated exactly this artefact, and had no way to tell.
+Beware the inverse most of all. Two genuinely identical configurations, compared over a handful of runs, will usually produce an apparent winner — and the margin will not be modest. This is the part that surprises people: small run counts do not generate small false effects, they generate enormous ones, because the observed rate can only move in steps of one over the number of runs. Compare a configuration against an identical copy of itself five times each and you will typically come away with a winner and a margin in the tens of points. Not occasionally. Usually. Every practitioner who has declared a config change a success on the strength of three runs has generated exactly this artefact, and had no way to tell.
 
 ---
 
