@@ -10,4 +10,24 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-exec go run . "$@"
+case "${1:-}" in
+  --eval)    shift; exec ./eval.sh "$@" ;;
+  --analyse) shift; exec ./analyse.sh "$@" ;;
+esac
+
+# Default: the sampling argument, as a simulation.
+go run . "$@"
+
+cat <<'TXT'
+
+────────────────────────────────────────────────────────────────────────
+That was the argument. Here it is as a working eval you can run:
+
+    ./eval.sh --config baseline        --runs 20
+    ./eval.sh --config trimmed-context --runs 20
+    ./analyse.sh
+
+Three cases, a pluggable agent, and a verdict on whether your result
+means anything. Offline and deterministic by default; swap in a real
+agent with agents/real.sh.example.
+TXT

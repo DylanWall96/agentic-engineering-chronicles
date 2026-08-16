@@ -1,40 +1,84 @@
 # Evals, running
 
-The load-bearing claim in [chronicle 003](../../chronicles/003-evals-for-your-own-harness.md) is that a single run cannot tell you whether a harness change helped, because the variation between runs is larger than the difference you are trying to detect.
+Two things: the argument behind [chronicle 003](../../chronicles/003-evals-for-your-own-harness.md), and a working eval you can point at a real agent.
 
-That is a claim about sampling, so it needs no model calls to demonstrate. Requires Go.
+Requires Go for the first, nothing but bash for the second. No network, no API keys, no model calls by default.
+
+## The argument
 
 ```sh
 ./run.sh              # fixed seed, reproduces exactly
 ./run.sh -seed 42     # vary it
 ```
 
-Two configurations are simulated with known, fixed success rates — 50% and 55%. B really is better. That is a fact of the simulation, not something to infer, which is what makes the wrong answers below legible as wrong.
+Two configurations with known success rates — 50% and 55%. B really is better, which is what makes the wrong answers legible as wrong.
 
-## What it shows
+- **One run each is a coin.** Half the time the comparison says nothing; when it answers, it is wrong about 45% of the time.
+- **A handful barely helps.** Five runs each: wrong 42% of the time it answers. Fifty: still 29%.
+- **The run counts that resolve it are not ones anybody uses.** 1,562 per configuration for a five-point difference at 80% power.
+- **The inverse is the alarming part.** Two *identical* configurations compared five times each show an apparent winner 75% of the time, with a typical claimed margin of 32 points. Small samples do not produce small false effects — the observed rate can only move in steps of one over the number of runs.
 
-**One run each is a coin.** Half the time both configurations produce the same outcome and the comparison says nothing at all. When it does give an answer, it is wrong about 45% of the time.
+## The eval
 
-**A handful of runs barely helps.** At five runs each it is wrong 42% of the time it answers; at fifty, still 29%. The ties thin out, so you get an answer more often — it just isn't a better answer. This is the regime everyone actually works in.
+```sh
+./eval.sh --config baseline        --runs 20
+./eval.sh --config trimmed-context --runs 20
+./analyse.sh
+```
 
-**The run counts that resolve it are not ones anybody uses.** For this five-point difference: 1,562 runs per configuration for 80% power, 2,092 for 90%, at α = 0.05. The simulation confirms the arithmetic empirically — at 1,562 runs each it is wrong 0.3% of the time. That is over four thousand agent runs to establish one five-point difference.
+```
+CONFIG             PASSED         PASS RATE        AVG TOKENS/RUN
+baseline           29/60          48.3%            52589
+trimmed-context    40/60          66.7%            40926
 
-**The inverse is the alarming part.** Two *identical* configurations, compared five times each, produce an apparent winner 75% of the time — with a typical claimed margin of **32 percentage points**. Small samples do not produce small false effects. They produce enormous ones, because the observed rate can only move in steps of one over the number of runs.
+observed   trimmed-context is 18.3 points ahead, on 60 runs each
+needed     111 runs each for 80% power, 148 for 90% (alpha 0.05)
+verdict    NOT DETECTABLE — 60 runs cannot resolve 18.3 points.
+           A gap this size needs 2x the runs you did.
 
-## Why no model calls
+cost       trimmed-context costs 22.2% less per run — and unlike the pass
+           rate, that is readable off a single run.
+```
 
-An example that needed live model calls would be non-deterministic, would cost money, and would break when models changed. [`examples/README.md`](../README.md) sets the standard that a failing example is a finding about the chronicle rather than a maintenance chore, and that only holds if the example is a closed system.
+That verdict is the point of the whole chronicle. An eighteen-point gap over sixty runs still is not evidence — and most people would have shipped the change on three. Meanwhile the cost difference is solid, from the same data, which is why 003 argues you should optimise on the axis you can actually see.
 
-Nothing here depends on any model's behaviour. It depends only on the fact that agent runs vary, which the chronicle sources separately.
-
-## A finding from building it
-
-003 originally said identical configurations would show "an apparent improvement of several points". The simulation put that at tens of points, not several. The chronicle was corrected to match the measurement — the example was not adjusted to agree with the chronicle.
+Run it with `--runs 60` and the verdict flips to DETECTABLE. That is the harness working, not the answer changing.
 
 ## Layout
 
 ```
-sim.go     the simulation, including the textbook sample-size calculation
-           so the chronicle's numbers can be checked rather than trusted
-run.sh     runs it
+cases/                       one directory per case
+  001-flags-migration-for-review/
+    task.md                  the prompt, fixed — never reworded between runs
+    expect.sh                exits 0 if the outcome was right
+    notes.md                 why this case exists, and what it came from
+agents/
+  fake.sh                    deterministic stand-in, runs offline
+  real.sh.example            swap in your own agent — one line
+eval.sh                      runs every case n times against one config
+analyse.sh                   reads results.jsonl, returns a verdict
+results.jsonl                one line per run
+sim.go                       the sampling argument analyse.sh rests on
 ```
+
+Every case came from something that actually went wrong — a migration applied unprompted, generated code hand-edited, a schema changed silently. That is where a golden set comes from: your own history, not an idea of what coverage should look like.
+
+## Pointing it at a real agent
+
+```sh
+cp agents/real.sh.example agents/real.sh && chmod +x agents/real.sh
+./eval.sh --agent real --config my-setup --runs 20
+```
+
+The harness only requires that the agent script works inside `$WORKSPACE` and writes `$TRANSCRIPT`. Cases, scoring, and analysis are unchanged. Only that one script is non-deterministic, which is why it is the only part you have to supply.
+
+## Why the default agent is fake
+
+An example needing live model calls would be non-deterministic, would cost money, and would break when models changed. [`examples/README.md`](../README.md) holds that a failing example is a finding about the chronicle rather than a maintenance chore, and that only works if the example is closed.
+
+The stand-in has fixed underlying success rates, so the harness can be checked against a known answer — something you never get with a real agent, and the reason the statistical problem exists at all.
+
+## Findings from building it
+
+- The runner recorded wall-clock, which made results irreproducible when a run crossed a second boundary. It now prefers a duration the agent reports, falling back to measured time for real agents.
+- 003 originally said identical configurations show "an apparent improvement of several points". The simulation put it in the tens. The chronicle was corrected; the example was not adjusted to agree with it.

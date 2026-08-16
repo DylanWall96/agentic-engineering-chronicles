@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Evaluate a real agent instead of the stand-in.
+#   cp agents/real.sh.example agents/real.sh && chmod +x agents/real.sh
+#   ./run.sh --agent real --config my-setup --runs 20
+#
+# The harness only requires that this works inside $WORKSPACE and writes
+# $TRANSCRIPT. Everything else — cases, scoring, analysis — is unchanged.
+set -euo pipefail
+case_name=$1; config=$2; run=$3
+
+cd "$WORKSPACE"
+your-agent-cli --print < "$EVAL_ROOT/cases/$case_name/task.md" > "$TRANSCRIPT" 2>&1
+
+# Record cost if your harness reports it; analyse.sh reads this file.
+# your-agent-cli --last-usage --json | jq .output_tokens > "$WORKSPACE/.tokens"

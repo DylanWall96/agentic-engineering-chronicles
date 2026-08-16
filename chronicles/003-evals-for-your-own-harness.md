@@ -2,7 +2,7 @@
 
 **Covers** — how to tell whether a change to your setup actually helped: a trimmed context file, an added skill, a different model tier, a new tool server.
 **Assumes** — 001. Where 002 verifies what the agent produced, this verifies the thing producing it.
-**Runnable** — [`examples/evals/`](../examples/evals/), the run-count argument as a simulation. No model calls.
+**Runnable** — [`examples/evals/`](../examples/evals/): the sampling argument as a simulation, plus a working eval — cases, runner, and a verdict on whether your result means anything. Offline by default; point it at a real agent with one script.
 
 001 treats evals as a precondition twice over: for moving past a single agent, and for shipping a skill you have actually tested. Both times it points here for what one is. This is that — how to build one, what it can and cannot resolve, and how to tell whether the change you just made to your setup did anything at all.
 
@@ -90,8 +90,21 @@ exit 0
 One line per run, so you can ask questions later that you did not think to ask now:
 
 ```json
-{"case":"002","config":"trimmed-context","pass":true,"tokens":48210,"seconds":73,"tool_calls":19}
+{"case":"002","config":"trimmed-context","run":7,"pass":true,"tokens":48210,"seconds":73}
 ```
+
+And an analysis step that answers the only question that matters — whether the gap you are looking at survives the number of runs you did:
+
+```
+observed   trimmed-context is 18.3 points ahead, on 60 runs each
+needed     111 runs each for 80% power, 148 for 90% (alpha 0.05)
+verdict    NOT DETECTABLE — 60 runs cannot resolve 18.3 points
+
+cost       trimmed-context costs 22.2% less per run — and unlike the pass
+           rate, that is readable off a single run
+```
+
+Eighteen points, sixty runs, and still not evidence. Most people would have shipped that change on three. The cost difference from the same data is solid, which is the escape hatch: optimise on the axis you can actually see. All of it runs in [`examples/evals/`](../examples/evals/).
 
 Then:
 

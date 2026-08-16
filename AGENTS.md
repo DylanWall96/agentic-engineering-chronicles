@@ -44,6 +44,21 @@ These are the reason the repo is worth reading. Hold them.
 5. Add its sources to `CHANGELOG.md`, dated.
 6. Add it to the chronicle list in `README.md`.
 
+## Every chronicle ships a working example
+
+Not optional, and not satisfied by a demonstration of the *problem*. If a chronicle recommends a practice, the example has to show that practice working, in a form a reader can run and then point at their own project.
+
+The distinction matters because it has already been got wrong. 003 shipped a simulation proving that one run tells you nothing — a correct and useful demonstration of the problem — while the chronicle described a golden set, a runner, and a results format that existed nowhere in the repo. Talking about a practice without showing it is the failure this repo exists to argue against.
+
+What an example owes the reader:
+
+- **The practice, working.** Not a diagram of it, not a printed snippet. Something that runs.
+- **A seam for their own project.** One clearly marked script or config to swap. Everything else stays.
+- **Determinism, offline.** No network, no API keys, no model calls in the default path. An example needing live calls is non-deterministic, costs money, and rots when models change — which breaks the standard that a failing example is a finding about the chronicle rather than a maintenance chore.
+- **A printed seed** where randomness is involved.
+
+The non-deterministic part is always exactly one thing: the agent. Isolate it behind a script with a stand-in default, and the rest of the harness — cases, scoring, analysis — is ordinary deterministic software you can ship.
+
 ## Build the example first
 
 Where a claim can be demonstrated in code, write the demonstration before you write the paragraph, and let the prose describe what the example actually shows.

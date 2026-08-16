@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+### 2026-08-16 — A working eval, and the standard behind it
+
+Added:
+- `examples/evals/` gains the practice, not just the argument: three cases drawn from real failures, a pluggable agent, a runner writing `results.jsonl`, and `analyse.sh` returning a verdict on whether the observed gap survives the number of runs
+- `AGENTS.md`: every chronicle ships a working example. Not a demonstration of the *problem* — the practice itself, runnable, with one clearly marked seam for the reader's own project
+
+003 described a golden set, a runner, and a results format that existed
+nowhere in the repo, while its example proved only that one run tells you
+nothing. Correct, useful, and not the practice. Talking about a practice
+without showing it is the failure this repo exists to argue against.
+
+The default agent is a deterministic stand-in with known underlying success
+rates, so the harness can be checked against an answer you never have with a
+real agent. Swapping in a real one is a single script.
+
+Found while building it: the runner recorded wall-clock, which made results
+irreproducible whenever a run crossed a second boundary. It now prefers a
+duration the agent reports and falls back to measured time.
+
 ### 2026-08-16 — Format pass across all three chronicles
 
 Changed:
