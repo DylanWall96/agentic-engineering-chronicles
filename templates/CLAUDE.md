@@ -7,6 +7,12 @@
   Target: under a couple of hundred lines including your content.
   The test: a new contributor asks "run the tests" and it works first try.
 
+  Worth knowing before you invest in this: controlled evaluation found that
+  supplying a context file did not generally improve task success, while
+  adding meaningful inference cost on every run. Keep it, keep it short, and
+  treat its value as unproven rather than assumed. See chronicle 001,
+  "CLAUDE.md and AGENTS.md", and 003 for how you would measure it.
+
   If you also keep an AGENTS.md, put the universal rules there and reduce
   this file to an import plus anything harness-specific. Don't duplicate.
 -->

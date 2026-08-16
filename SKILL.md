@@ -29,6 +29,7 @@ Read only what the task needs. Each chronicle is self-contained prose; the templ
 | Comparing two setups, or two model tiers | `chronicles/003` — *The Minimum Unit of Evidence*, *Cost as a Metric* |
 | Building a golden set, or scoring agent runs | `chronicles/003` — *The Golden Set*, *Scripts and Judges* |
 | Citing a public benchmark to justify a choice | `chronicles/003` — *Your Own Suite and the Public Ones* |
+| Asking you to look over their setup | `references/workspace-audit.md` |
 
 Chronicles 002 and 003 both assume 001. If the user is starting from nothing, 001 first. 003 carries findings that qualify 001 — read the qualifier in 001's *CLAUDE.md and AGENTS.md* section alongside it.
 
@@ -41,6 +42,10 @@ When asked to set up or improve a workspace:
 3. **Start from a template, then cut.** See `templates/`. Generated starters are always too long; trim to what's specific to this project.
 4. **Enforce with tooling where possible.** Anything phrased as "never do X" or "always do Y" belongs in a hook, not a context file.
 5. **Say what you didn't do.** If you skipped a recommendation because it didn't fit, tell the user which and why.
+
+## Auditing a workspace
+
+When the user asks you to review their setup, read `references/workspace-audit.md` and follow it. Report observations against the chronicles; don't grade, and don't prescribe. Most workspaces have too much rather than too little, so lead with what could go. If the repository shows no sign of agent use, say so and stop rather than producing a setup plan nobody asked for.
 
 ## Rules
 

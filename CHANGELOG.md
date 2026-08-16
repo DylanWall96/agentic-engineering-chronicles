@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### 2026-08-16 — Cohesion pass, workspace audit
+
+Changed:
+- 001 now states at the top that most of it is practitioner consensus rather than measured result, and points at 003 for telling the difference. This was the largest incoherence in the repo: 001 reads as settled practice while 003 argues most harness changes are unverified hypotheses, including 001's
+- 001's "every line costs you adherence elsewhere" corrected. The factorial study found positive evidence of no effect for file size on adherence, so the mechanism was folklore. The advice survives on cost grounds and now says so
+- Quick Reference row "Test your context — untested skills can hurt performance" replaced with "Verify, don't assume", since it rested on the claim retired above
+- `templates/CLAUDE.md` carries the qualifier, so a reader copying the template meets the caveat rather than only the advice
+
+Added:
+- `references/workspace-audit.md` and a short SKILL.md section — assess a repository against the chronicles and report observations, never a score, grade, or checklist. Leads with what could be removed, labels absence as frequently correct rather than a gap, attributes every observation to a chronicle section, and stops rather than prescribing a setup to a repository showing no sign of agent use
+
 ### 2026-08-16 — Chronicle 003 and its example
 
 Added:

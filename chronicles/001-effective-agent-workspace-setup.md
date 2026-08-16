@@ -2,6 +2,8 @@
 
 A working guide for individuals, teams, and companies adopting AI coding agents. Focused on principles and patterns that hold up as the tooling evolves.
 
+Most of what follows is practitioner consensus rather than measured result. That is worth stating at the top, because some of it has already failed to survive contact with evidence — noted where it happens. Chronicle 003 covers how you would tell the difference for your own setup.
+
 ---
 
 ## Mental Model
@@ -87,7 +89,7 @@ Your persistent project context. Most setups support generating a starter from t
 
 **Practical limits:**
 
-- Keep it tight. Frontier models reliably follow a finite number of instructions; the harness already consumes a chunk of that budget. Every line you add costs you adherence elsewhere. Targeting a few hundred lines or fewer is a good discipline, and vendor guidance has converged on the low end of that range.
+- Keep it tight, but for the right reason. The usual argument is that every line costs you adherence elsewhere. A factorial study varying file size, instruction position, file architecture, and contradictions between adjacent files found none of them detectably changed whether the agent followed instructions — and for size, it found positive evidence of no effect rather than merely failing to find one. So the adherence mechanism is folklore. What survives is cost: every line is paid for on every turn, forever, and the benefit it buys is unmeasured. Targeting a few hundred lines or fewer remains good discipline on those grounds alone, and vendor guidance sits at the low end of that range.
 - For sections that should only fire on specific tasks, use conditional wrappers. Make the conditions narrow. Don't wrap project identity, structure, or stack — those are always relevant.
 - Don't auto-generate the file and leave it alone. Starter generators produce comprehensive output that almost always needs trimming.
 - Don't `@`-mention large reference docs. That embeds the file every turn. Instead, tell the agent when to read it: "For complex Foo usage or if you encounter `FooBarError`, see `path/to/docs.md`."
@@ -362,7 +364,7 @@ A handful of patterns that keep showing up in successful adoptions:
 | Treat as new hire | Document what's specific to *your* project |
 | Progressive disclosure | Use skills for on-demand expertise |
 | Walk before codifying | Don't write a skill on first encounter — do it manually first |
-| Test your context | Use eval frameworks; untested skills can hurt performance |
+| Verify, don't assume | Your harness change is a hypothesis until measured — see 003 |
 | Recursive improvement | Failed skill → diagnose → update → re-eval |
 | Hooks for invariants | Use hooks for anything that must always happen |
 | Skills are third-party code | Apply the same trust hierarchy as plugins |
