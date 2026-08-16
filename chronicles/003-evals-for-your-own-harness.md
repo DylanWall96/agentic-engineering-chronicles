@@ -1,8 +1,10 @@
 # Evals for Your Own Harness
 
-Chronicle 001 lists "you have evals" as a precondition for moving past a single agent, and separately advises testing skills against held-out cases before shipping them. It never says what an eval is, how you would build one, or how you would know a harness change helped. This is the follow-through.
+**Covers** — how to tell whether a change to your setup actually helped: a trimmed context file, an added skill, a different model tier, a new tool server.
+**Assumes** — 001. Where 002 verifies what the agent produced, this verifies the thing producing it.
+**Runnable** — [`examples/evals/`](../examples/evals/), the run-count argument as a simulation. No model calls.
 
-The subject is your setup, not the agent's output. Chronicle 002 covers establishing that what was generated is correct. This one covers establishing that the thing which generated it is any good — and, more often, whether the change you just made to it did anything at all.
+001 lists "you have evals" as a precondition for moving past a single agent, and advises testing skills against held-out cases. It never says what an eval is, how you would build one, or how you would know a harness change helped. This is the follow-through.
 
 ---
 
@@ -28,7 +30,19 @@ Agent runs are not deterministic. The same prompt against the same model with th
 
 **So the minimum unit of evidence is a distribution, not a run.** Comparing one before to one after is not weak evidence. It is no evidence, and it is worse than none, because it produces a confident conclusion.
 
-The arithmetic here is unforgiving, and it is the single most useful thing in this chronicle. On a suite that yields pass or fail per task, detecting a difference of a couple of percentage points needs runs in the *thousands* per configuration. A five-point difference needs low thousands. Even a ten-point difference — large enough that you would expect to feel it — needs several hundred. Only differences so large you would never have needed statistics to see them resolve in the dozens.
+The arithmetic is unforgiving, and it is the most directly useful thing in this chronicle. On a suite that yields pass or fail per task:
+
+| Difference you want to detect | Runs per config, 80% power | 90% power |
+| --- | --- | --- |
+| 2 points | 9,804 | 13,125 |
+| 5 points | 1,562 | 2,092 |
+| 10 points | 385 | 515 |
+| 15 points | 167 | 224 |
+| 40 points | 17 | 23 |
+
+Two-proportion test, binary pass/fail per task, baseline success rate 50%, α = 0.05 two-sided. Baselines further from 50% need somewhat fewer runs; a paired design where both configurations face the same cases needs fewer still. Run the numbers for your own baseline rather than taking the table — the calculation is in the example, and it is four lines.
+
+Read the top row before dismissing this as academic. Detecting the kind of difference people routinely claim from a config change — a couple of points — takes roughly ten thousand runs per configuration. Nobody has ever done that. Nobody will.
 
 Nobody runs that many. Which means, stated plainly: **most before-and-after comparisons of harness changes cannot detect the differences they claim to have found.** The honest conclusion from a handful of runs each way is almost always "no detectable difference", and the second most honest is "this needs a bigger effect to be worth chasing".
 
@@ -44,12 +58,47 @@ A golden set is a small collection of tasks representative of your actual work, 
 
 **Its value is in coverage of failure modes, not volume.** Ten tasks that fail in ten different ways will teach you more than a hundred variations on the same one. Build it from things that have actually gone wrong: the refactor the agent botched, the migration it did not realise needed review, the file it kept editing when it should have asked. Each becomes a case. The suite grows out of your own history rather than out of an idea of what coverage should look like.
 
-Practical shape:
+A shape that works, and stays a directory of plain files rather than a framework:
 
-- **Fix the task, not the phrasing.** The point is to vary the harness and hold everything else steady. If you also reword prompts between runs, you have measured two things and can attribute neither.
-- **Record the whole run, not the verdict.** Tokens spent, wall-clock, tool calls made, files touched. The pass or fail is the least informative number you collect, and the rest is what tells you why.
-- **Keep the outcomes checkable by something other than your impression.** Chronicle 002's argument applies here without modification.
-- **Let it go stale deliberately.** A case that has passed for months on every configuration is no longer discriminating between anything. Retire it or replace it.
+```
+evals/
+  cases/
+    001-flags-migration-for-review/
+      task.md        the prompt, fixed — never reworded between runs
+      expect.sh      exits 0 if the outcome was right
+      notes.md       why this case exists, and what it came from
+    002-leaves-generated-code-alone/
+    003-asks-before-schema-change/
+  run.sh             runs every case n times against one config
+  results.jsonl      one line per run
+```
+
+`expect.sh` is the whole trick. It is a script, so it has no opinion:
+
+```sh
+#!/usr/bin/env bash
+# Case 002: must not edit generated output under proto/.
+# Came from: the session that "fixed" a build error by hand-editing
+# generated code, which survived review and broke the next regen.
+set -euo pipefail
+
+git diff --name-only | grep -q '^proto/' && exit 1   # touched generated output
+grep -qi 'regenerat' "$TRANSCRIPT" || exit 1         # never said what should happen instead
+exit 0
+```
+
+One line per run, so you can ask questions later that you did not think to ask now:
+
+```json
+{"case":"002","config":"trimmed-context","pass":true,"tokens":48210,"seconds":73,"tool_calls":19}
+```
+
+Then:
+
+- **Fix the task, not the phrasing.** Vary the harness and hold everything else steady. If you also reword prompts between runs, you have measured two things and can attribute neither.
+- **Record the whole run, not the verdict.** Tokens, wall-clock, tool calls, files touched. The pass or fail is the least informative number in that line, and the rest is what tells you why.
+- **Keep the outcomes checkable by something other than your impression.** Chronicle 002's argument applies here without modification — that is what `expect.sh` is for.
+- **Let cases go stale deliberately.** A case that has passed for months on every configuration is no longer discriminating between anything. Retire it or replace it.
 
 Common sizing advice exists and is widely repeated, but it is practitioner convention rather than a measured finding. Pick the smallest set that covers your distinct failure modes and let the arithmetic above tell you how much a run of it can actually prove.
 

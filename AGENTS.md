@@ -20,7 +20,8 @@ It is also installable as a skill (`SKILL.md`), so changes to structure or filen
 
 These are the reason the repo is worth reading. Hold them.
 
-- **Principles over feature lists.** Write what will still be true after the next model release. Avoid version numbers, product names, exact thresholds, and UI descriptions in chronicle bodies. If a specific is essential, put it in `CHANGELOG.md` and refer to it generically in the text.
+- **Principles over feature lists.** Write what will still be true after the next model release. Keep version numbers, product names, and UI descriptions out of chronicle bodies. Those date; put them in `CHANGELOG.md` and refer to them generically.
+- **But numbers a reader needs to act on belong in the body.** The rule above is about specifics that identify a vendor's product, not about arithmetic. A sample size, a threshold someone has to compute against, a figure that changes what they do on Monday — that is the practical content, and stating it generically to satisfy the rule above guts the chronicle. If you find yourself writing "runs in the thousands" where you could write the table, write the table. This has already gone wrong once: 003 shipped its central arithmetic as vague magnitudes and had to have it put back.
 - **No speculation.** Claims belong in the chronicles only if they have held across model generations or have concrete adoption behind them. Anything untested goes to GitHub Discussions.
 - **First person is implicit, not stated.** The voice is experience-backed and unattributed. Don't add "studies show" or "research suggests" to the body — sources live in the CHANGELOG.
 - **Cut before adding.** These documents argue that bloated context degrades performance. A chronicle that doubles in length has failed its own test. Prefer a new chronicle to an expanding one.
