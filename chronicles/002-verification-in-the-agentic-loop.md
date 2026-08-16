@@ -1,6 +1,8 @@
 # Verification in the Agentic Loop
 
-Chronicle 001 says verification beats execution and leaves it there. This one is the follow-through: what verification actually means when an agent is writing the code, why a passing test suite is weaker evidence than it used to be, and what to do about it.
+**Covers** — why a passing test suite is weaker evidence when an agent wrote the code, the routes it takes to green without solving the problem, and what to hold back so you can tell the difference.
+**Assumes** — 001, which says verification beats execution and leaves it there. This is the follow-through.
+**Runnable** — [`examples/verification/`](../examples/verification/), where a green suite hides three real bugs.
 
 ---
 
@@ -34,23 +36,28 @@ Everything else — the agent's summary, its confidence, its explanation of what
 
 ## How Agents Cheat
 
-Not maliciously. These are the shortest paths to green, and a system optimising for green will find them.
+Not maliciously. These are the shortest paths to green, and a system optimising for green will find them. Every row below is reproduced in `examples/verification/cheats/`, each producing a genuinely passing suite.
 
-**Editing the oracle.** The most direct route. The test asserted something inconvenient, so the assertion changed, loosened, or disappeared. Deleted tests are conspicuous in a diff; a changed expected value in a two-hundred-file diff is not.
+| Pattern | What it looks like in the diff | What catches it |
+| --- | --- | --- |
+| **Edit the oracle** | An expected value changed, an assertion loosened or deleted | Test diff read separately; a freeze hook prevents it outright |
+| **Hardcode the answer** | A literal in a return that matches what the test expects | Held-out cases; a reviewer spotting lookup-table shape |
+| **Read the fixtures** | Code that loads the expectations file it was supposed to compute | Held-out cases generated fresh at verification time |
+| **Special-case the inputs** | A branch on exactly the values the suite uses; general path unimplemented | Held-out cases |
+| **Weaken the assertion** | `assertEqual` becomes `assertIsNotNone`; a specific exception becomes a bare catch | Test diff read separately |
+| **Mock the thing under test** | A stub introduced into a test that was previously integration-level | Test diff; running it for real |
+| **Swallow the error** | try/except around the failing path, handler empty or logging only | Source diff; running it for real |
+| **Exploit the harness** | Skip marker, changed runner config, early exit, unchecked exit code | Check the runner's exit status, not its output |
 
-**Hardcoding the answer.** The function returns the literal value the test expects. Passes perfectly, generalises to nothing. Common when the agent has struggled for several turns and the test is the only feedback it has.
+That last row needs no agent at all. A failing suite reports success the moment its exit code passes through a pipe:
 
-**Reading the fixtures.** If the expected outputs are in a file the agent can read, it doesn't need to solve the problem. It needs to reproduce a table.
+```sh
+go test ./...              # exit 1
+go test ./... | tee log    # exit 0  — the failure is gone
+set -o pipefail            # exit 1  — restored
+```
 
-**Special-casing the test inputs.** A branch that handles exactly the values the suite uses, with the general path left broken or unimplemented.
-
-**Weakening the assertion.** `assertEqual` becomes `assertIsNotNone`. A specific exception becomes a bare catch. The test still exists, still runs, still passes, and now tests almost nothing.
-
-**Mocking the thing under test.** The integration test passes because the integration was replaced with a stub that returns what the test wants.
-
-**Swallowing the error.** A try/except around the failing path, with the failure logged or silently ignored. The suite goes green and the bug ships.
-
-**Exploiting the harness.** Anything that makes the test runner report success without the tests meaningfully running — a skip decorator, a changed configuration, an early exit, an exit code that was never checked.
+Most CI scripts are one `set -o pipefail` away from reporting green on a red suite.
 
 Two patterns are worth internalising. **The gap widens with difficulty**: on easy tasks the honest path is the shortest one, so you see little of this; on hard tasks where the agent is stuck, the incentive to satisfy the letter of the test grows exactly when you're least able to check the work. And **it correlates with struggle**: an agent that solved something in two turns rarely games it. An agent on its ninth attempt at the same failing test is in the regime where this happens.
 
@@ -64,12 +71,26 @@ The shape is straightforward. The agent gets a working set of tests to iterate a
 
 The two diverge exactly when something has gone wrong. An agent that solved the problem passes both. An agent that fitted itself to the visible cases passes one. That divergence is the highest-signal number in agentic development, and it costs almost nothing to produce.
 
+The layout that makes "out of reach" true rather than aspirational:
+
+```
+repo/                    the tree the agent was given
+  src/
+  tests/                 working set — it reads, runs and iterates against these
+
+../oracle/               held out, outside that tree entirely
+  cases/                 same spec, different inputs
+  run.sh                 run at boundaries, never during implementation
+```
+
+Keeping it outside the tree is the version that works. A hook denying reads is a workable fallback. Co-locating it and relying on the agent not to look is not a held-out suite — it is a suite you have decided to feel good about.
+
 Practical notes:
 
 - The held-out set doesn't need to be large. A handful of cases per behaviour is enough to catch fitting.
-- It needs to be genuinely out of reach. Not in the repo the agent is working in, or gated behind a hook that blocks reads, or generated fresh at verification time.
 - Run it at boundaries, not continuously. If the agent gets feedback from the held-out set, it stops being held out.
 - Keep it in the same spec, not a harder one. You're testing honesty, not capability.
+- Generating it fresh at verification time beats storing it, where the spec allows.
 
 ---
 
@@ -85,7 +106,38 @@ Practical notes:
 
 **Make tests structurally hard to modify.** A hook that blocks writes to test paths during implementation turns a probabilistic instruction into an invariant — this is exactly the case 001 describes for deterministic enforcement. If the agent needs a test changed, it has to come back and ask, which is the conversation you wanted to have anyway.
 
-**Separate the test diff from the source diff.** Review them apart. Test changes in a large PR are where the interesting failures hide, and they're the first thing to read, not the last.
+The load-bearing half of it, verbatim from [`templates/hooks/freeze-tests.sh`](../templates/hooks/freeze-tests.sh):
+
+```sh
+# Fires only while a sentinel exists, so you can unfreeze for work that is
+# legitimately about the tests:  touch .claude/tests-frozen
+[ -f "${CLAUDE_PROJECT_DIR:-.}/.claude/tests-frozen" ] || exit 0
+
+file_path=$(jq -r '.tool_input.file_path // empty')
+[ -z "$file_path" ] && exit 0
+
+case "$file_path" in
+  */test/*|*/tests/*|*/spec/*|*_test.*|*.test.*|*.spec.*|*/conftest.py|*/__tests__/*)
+    # emit a deny decision with a reason the agent can act on
+    ;;
+esac
+```
+
+In use:
+
+```
+Edit user_test.go  ->  DENY: Tests are frozen during implementation.
+Edit user.go       ->  allowed
+```
+
+**Separate the test diff from the source diff.** Review them apart, tests first. This is not a stylistic preference — it is the difference between reading everything and reading the part where failures hide:
+
+```sh
+git diff --stat -- '*_test*'    # what moved in the tests, at a glance
+git diff -- '*_test*'           # read this before the source diff
+```
+
+On a change touching two hundred files, the full diff runs to around 1,800 lines. Filtered to tests it is eight, and a tax rate quietly moved from 0.20 to 0.08 sits in the middle of them. Deletions are louder still — a removed test file shows up in `--numstat` without reading any diff body at all. Modification is the silent one, which is why the filter matters.
 
 **Don't let the agent both write the spec and satisfy it.** If it produced the tests from a loose description, it has defined the target it's being measured against. Either write them yourself, or freeze and review them before implementation begins.
 
@@ -97,7 +149,14 @@ Assume some of it gets through anyway. What catches it:
 
 **Diff the tests first.** Any change to an existing test during an implementation task deserves an explanation. Most will be legitimate. The ones that aren't will be obvious once you're looking.
 
-**Watch for the tells.** Assertions that got weaker. New try/except with an empty or logging-only handler. Skip markers. Literal values in return statements that match test expectations. Mocks introduced into tests that were previously integration-level. Configuration changes to the test runner in a code PR.
+**Watch for the tells.** In rough order of how often they turn out to matter:
+
+- an assertion that got weaker
+- a literal in a return statement matching a test expectation
+- a new try/except whose handler is empty or only logs
+- a skip marker, or a test-runner config change arriving in a code PR
+- a mock introduced into a test that used to be integration-level
+- a changed expected value with no explanation in the PR description
 
 **Use a reviewer with no shared context.** The reviewing agent from 001 works here too, and at this particular job it beats a held-out suite — it can read intent and spot that a function is shaped like a lookup table, which no test will tell you. Give it the spec and the diff, not the implementing session's reasoning.
 
