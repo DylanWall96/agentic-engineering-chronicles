@@ -15,6 +15,16 @@ case "${1:-}" in
   --analyse) shift; exec ./analyse.sh "$@" ;;
 esac
 
+# A runner that cannot distinguish a build failure from a result is the
+# defect this repo warns about. Check the toolchain before reporting numbers.
+if ! err=$(go build ./... 2>&1); then
+  printf '\n  Cannot build, so no numbers are shown — they would be meaningless.\n\n'
+  printf '  %s\n\n' "$err" | head -5
+  printf '  Needs Go 1.21 or later. You have: %s\n' "$(go version 2>&1)"
+  printf '  The eval half needs no Go at all:  ./eval.sh --config baseline --runs 20\n\n'
+  exit 1
+fi
+
 # Default: the sampling argument, as a simulation.
 go run . "$@"
 

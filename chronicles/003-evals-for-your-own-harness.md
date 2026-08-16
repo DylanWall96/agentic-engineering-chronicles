@@ -34,13 +34,13 @@ The arithmetic is unforgiving, and it is the most directly useful thing in this 
 
 | Difference you want to detect | Runs per config, 80% power | 90% power |
 | --- | --- | --- |
-| 2 points | 9,804 | 13,125 |
-| 5 points | 1,562 | 2,092 |
+| 2 points | 9,804 | 13,124 |
+| 5 points | 1,562 | 2,091 |
 | 10 points | 385 | 515 |
-| 15 points | 167 | 224 |
+| 15 points | 167 | 223 |
 | 40 points | 17 | 23 |
 
-Two-proportion test, binary pass/fail per task, baseline success rate 50%, α = 0.05 two-sided. Baselines further from 50% need somewhat fewer runs; a paired design where both configurations face the same cases needs fewer still. Run the numbers for your own baseline rather than taking the table — the calculation is in the example, and it is four lines.
+Unpooled two-proportion test, binary pass/fail per task, baseline success rate 50%, α = 0.05 two-sided. Baselines further from 50% need somewhat fewer runs; a paired design where both configurations face the same cases needs fewer still. Run the numbers for your own baseline rather than taking the table — the calculation is in the example, and it is four lines.
 
 Read the top row before dismissing this as academic. Detecting the kind of difference people routinely claim from a config change — a couple of points — takes roughly ten thousand runs per configuration. Nobody has ever done that. Nobody will.
 

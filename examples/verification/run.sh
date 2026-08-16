@@ -9,6 +9,17 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 
+# Section 6 of this demo is about test runners that report success without the
+# tests meaningfully running. A runner that cannot tell a build failure from a
+# test failure has the same defect, so check the toolchain before claiming
+# anything about the code.
+if ! err=$(go build ./... 2>&1); then
+  printf '\n  Cannot build. Every result below would be meaningless, so nothing is shown.\n\n'
+  printf '  %s\n\n' "$err" | head -5
+  printf '  This example needs Go 1.21 or later. You have: %s\n\n' "$(go version 2>&1)"
+  exit 1
+fi
+
 bar() { printf '\n\033[1m%s\033[0m\n' "$1"; }
 
 bar "1. A fitted implementation against the suite it was given"

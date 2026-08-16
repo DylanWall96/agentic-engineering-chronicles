@@ -1,6 +1,6 @@
 # Examples
 
-Runnable demonstrations of claims made in the chronicles. Where a chronicle asserts something mechanical, this is where you can check it rather than take it on faith.
+Runnable demonstrations of claims made in the chronicles. `verification/` and `evals/` need **Go 1.21 or later**; `context-budget/` and the eval half of `evals/` need only bash. Each runner checks its toolchain before printing numbers, because a runner that cannot tell a build failure from a result has the defect 002 warns about. Where a chronicle asserts something mechanical, this is where you can check it rather than take it on faith.
 
 | Example | Chronicle | Run |
 | --- | --- | --- |

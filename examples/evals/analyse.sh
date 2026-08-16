@@ -6,11 +6,14 @@ cd "$(dirname "$0")"
 [ -s results.jsonl ] || { echo "no results.jsonl — run ./eval.sh first" >&2; exit 1; }
 
 awk '
+function ceil(x,   i) { i = int(x); return (x > i) ? i + 1 : i }
+# Unpooled two-proportion sample size, per configuration. Full-precision z:
+# rounded values shift several cells by one.
 function n_required(p1, p2, zb,   d, num) {
   d = p2 - p1; if (d < 0) d = -d
   if (d == 0) return -1
-  num = (1.96 + zb) ^ 2 * (p1 * (1 - p1) + p2 * (1 - p2))
-  return int(num / (d * d)) + 1
+  num = (1.9599639845400545 + zb) ^ 2 * (p1 * (1 - p1) + p2 * (1 - p2))
+  return ceil(num / (d * d))
 }
 {
   match($0, /"config":"[^"]*"/); cfg = substr($0, RSTART+10, RLENGTH-11)
@@ -31,8 +34,8 @@ END {
   a = order[1]; b = order[2]
   gap = (rate[b] - rate[a]) * 100; agap = gap < 0 ? -gap : gap
   per = runs[a] < runs[b] ? runs[a] : runs[b]
-  need80 = n_required(rate[a], rate[b], 0.8416)
-  need90 = n_required(rate[a], rate[b], 1.2816)
+  need80 = n_required(rate[a], rate[b], 0.8416212335729143)
+  need90 = n_required(rate[a], rate[b], 1.2815515655446004)
 
   printf "\nobserved   %s is %.1f points %s, on %d runs each\n", b, agap, (gap >= 0 ? "ahead" : "behind"), per
   if (need80 < 0) { printf "verdict    identical pass rates — nothing to test\n" }
@@ -43,6 +46,11 @@ END {
   }
   tgap = (tokens[b]/runs[b] - tokens[a]/runs[a]) / (tokens[a]/runs[a]) * 100
   atg = tgap < 0 ? -tgap : tgap
-  printf "\ncost       %s costs %.1f%% %s per run — and unlike the pass rate,\n           that is readable off a single run.\n\n", b, atg, (tgap >= 0 ? "more" : "less")
+  printf "\ncost       %s costs %.1f%% %s per run — and unlike the pass rate,\n           that is readable off a single run.\n", b, atg, (tgap >= 0 ? "more" : "less")
+  printf "\ncaveat     Those %d observations are %d repeats of each case, and both\n", per, per / 3
+  printf "           configs face the same cases — so they are paired and clustered,\n"
+  printf "           while the calculation above treats them as independent. It is\n"
+  printf "           therefore conservative: the real requirement is somewhat lower.\n"
+  printf "           A per-case or paired analysis would be tighter. See README.\n\n"
 }
 ' results.jsonl

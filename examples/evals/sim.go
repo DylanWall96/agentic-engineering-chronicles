@@ -44,11 +44,14 @@ func compare(rng *rand.Rand, rA, rB float64, n int) (bWins, tie bool, margin flo
 	return b > a, a == b, (b - a) * 100
 }
 
-// requiredN is the textbook two-proportion sample size, per configuration.
+// requiredN is the textbook UNPOOLED two-proportion sample size, per
+// configuration. The pooled variant differs by a few runs — see README.
 // Included so the number in the chronicle can be checked rather than trusted.
 func requiredN(p1, delta, power float64) int {
-	zAlpha := 1.9600 // two-sided, alpha = 0.05
-	zBeta := map[float64]float64{0.80: 0.8416, 0.90: 1.2816}[power]
+	// Full precision: rounded z-values shift three cells of the published
+	// table by one, which is how the chronicle and this code came to disagree.
+	zAlpha := 1.9599639845400545 // two-sided, alpha = 0.05
+	zBeta := map[float64]float64{0.80: 0.8416212335729143, 0.90: 1.2815515655446004}[power]
 	p2 := p1 + delta
 	num := math.Pow(zAlpha+zBeta, 2) * (p1*(1-p1) + p2*(1-p2))
 	return int(math.Ceil(num / (delta * delta)))

@@ -2,7 +2,7 @@
 
 Two things: the argument behind [chronicle 003](../../chronicles/003-evals-for-your-own-harness.md), and a working eval you can point at a real agent.
 
-Requires Go for the first, nothing but bash for the second. No network, no API keys, no model calls by default.
+Requires **Go 1.21+** for the first, nothing but bash for the second. No network, no API keys, no model calls by default.
 
 ## The argument
 
@@ -77,6 +77,14 @@ The harness only requires that the agent script works inside `$WORKSPACE` and wr
 An example needing live model calls would be non-deterministic, would cost money, and would break when models changed. [`examples/README.md`](../README.md) holds that a failing example is a finding about the chronicle rather than a maintenance chore, and that only works if the example is closed.
 
 The stand-in has fixed underlying success rates, so the harness can be checked against a known answer — something you never get with a real agent, and the reason the statistical problem exists at all.
+
+## Known limits of the analysis
+
+**The test is unpooled two-proportion, and the data is paired and clustered.** Sixty observations per config are twenty repeats of each of three cases, and both configs face the same cases. `n_required()` treats all sixty as independent Bernoulli draws, which they are not — runs within a case correlate. The error is conservative: it asks for more runs than a paired or per-case analysis would. A tighter version would model the case as a random effect, or compare configs case by case and combine.
+
+003 says as much in a footnote — "a paired design where both configurations face the same cases needs fewer still" — so the chronicle and this code disagree about the design. The code is the conservative one. Flagged by external review, 2026-08-16.
+
+**Full-precision z, unpooled.** Rounded z-values shift three cells of 003's table by one; the pooled variant differs by a few runs more. Both are named in the code so the calculation can be reproduced rather than guessed at.
 
 ## Findings from building it
 

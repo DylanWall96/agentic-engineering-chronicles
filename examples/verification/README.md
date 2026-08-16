@@ -1,6 +1,6 @@
 # Verification, running
 
-Everything [chronicle 002](../../chronicles/002-verification-in-the-agentic-loop.md) argues, as code you can execute. Requires Go.
+Everything [chronicle 002](../../chronicles/002-verification-in-the-agentic-loop.md) argues, as code you can execute. Requires **Go 1.21+**.
 
 ```sh
 ./run.sh

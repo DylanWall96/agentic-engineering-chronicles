@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### 2026-08-16 — External review
+
+First outside review. Five findings, four upheld.
+
+Fixed:
+- **`examples/verification` and `examples/evals` pinned `go 1.25` for no reason.** On any earlier toolchain the build failed, `run.sh` rendered that as test failure, and the hardcoded narration asserted each claim while the numbers refuted it — every taxonomy row reading FAIL where the point is that cheats read PASS. Nothing in either needed 1.25; both now declare 1.21, and both runners check the toolchain before printing anything. A runner that cannot tell a build failure from a result has exactly the defect 002's section 6 warns about, which is how a version pin became a correctness bug.
+- **Three cells of 003's table were off by one**, from rounded z-values rather than full precision: 13,125→13,124, 2,092→2,091, 224→223. Both implementations now carry full-precision z, `analyse.sh` uses a real ceiling rather than `int(x)+1`, and the test is named as *unpooled* since the pooled variant differs.
+- **Two cited power-analysis figures appear to contradict the table by 28–70×**, and one was described as "consistent in shape" with it, which was wrong. Both are now recorded as unreconciled and unverified rather than used as support.
+- **`analyse.sh` applies an independent two-proportion test to paired, clustered data** — repeats within a case correlate, and both configs face the same cases. The error is conservative, but the chronicle's own footnote acknowledges the design while the code ignores it. Now stated in the output and the README.
+- 001 now states the scope of the McMillan study: it measured compliance with one trivial annotation, which is narrower than adherence in general.
+
+Not upheld:
+- The review reported that the revised Gloaguen abstract says context files "tend to reduce task success rates", making the repo's quote stale and its exclusion of a per-variant split over-cautious. Fetching `arxiv.org/abs/2602.11988v2` directly returns "does not generally improve task success rates" — the wording already quoted. No change; the exclusion stands.
+
+Left unreviewed by the reviewer, and so still unchecked: the Faros dependency, the judge-bias citations, the SWE-Bench+ figures, `redundant.sh` false negatives, and `templates/`.
+
 ### 2026-08-16 — An example for 001
 
 Added:
@@ -278,10 +294,16 @@ The chronicle bodies carry no citations by design. Every claim in them that asse
 
 The body carries magnitudes rather than figures. The figures, and what they are conditional on:
 
-- Computed for this chronicle, not borrowed: two-proportion z-test, binary pass/fail per task, baseline success 50%, α = 0.05, two-sided. Runs **per configuration**, ceilinged: 2pp effect — 9,804 at 80% power, 13,125 at 90%. 5pp — 1,562 / 2,092. 10pp — 385 / 515. 15pp — 167 / 224. 40pp — 17 / 23. The table is now in 003's body, not only here. Baseline rates away from 50% reduce these somewhat; paired designs reduce them further. Reproduced empirically by `examples/evals/`.
-- 2025-12 — *ReasonBENCH: Benchmarking the (In)Stability of LLM Reasoning* — arxiv.org/pdf/2512.07795 — two-stage power analysis justifying 30 runs per configuration for a 5% effect at 90% power, α = 0.05.
-  - **Not cited in the body, and worth recording why.** Its unit of observation is a benchmark *score* — a scaled sum over many per-problem Bernoulli outcomes — so its variance is far lower than a per-task pass/fail. Quoting "30 runs for a 5% effect" to someone re-running a golden set would understate what they need by roughly two orders of magnitude. The figure is correct for what it measures and wrong for what a reader would use it for.
-- 2026-05 — *Coordination as an Architectural Layer for LLM-Based Multi-Agent Systems* — arxiv.org/pdf/2605.03310 — ~350 resolved binary predictions per condition to detect a 0.02 difference at α = 0.05, 80% power. Binary outcome, consistent in shape with the computed table.
+- Computed for this chronicle, not borrowed: **unpooled** two-proportion z-test, binary pass/fail per task, baseline success 50%, α = 0.05, two-sided, full-precision z, ceilinged. Runs **per configuration**: 2pp effect — 9,804 at 80% power, 13,124 at 90%. 5pp — 1,562 / 2,091. 10pp — 385 / 515. 15pp — 167 / 223. 40pp — 17 / 23. The table is in 003's body.
+  - Three of those cells were previously off by one, from rounded z-values (1.96, 1.2816) rather than full precision. Corrected 2026-08-16 after external review. The pooled variant gives slightly higher numbers — 388 rather than 385 at ten points — which is why the test is now named rather than left as "two-proportion". Baseline rates away from 50% reduce these somewhat; paired designs reduce them further. Reproduced empirically by `examples/evals/`.
+**Two published figures that appear to contradict the table, and are not cited in the body**
+
+Recorded because a reader who finds them will think the arithmetic above is wrong. Neither was reconciled, so neither is used.
+
+- 2025-12 — *ReasonBENCH: Benchmarking the (In)Stability of LLM Reasoning* — arxiv.org/pdf/2512.07795 — reported as justifying 30 runs per configuration for a 5% effect at 90% power. The table says 2,091 for those parameters — a 70× gap. The likely explanation is the unit of observation: a benchmark *score* is a scaled sum over many per-problem Bernoulli outcomes, so its variance is far lower than a single pass/fail. **That explanation is inferred, not confirmed** — the figure was taken from a summary and the 29-page body was not read. Treat this entry as unverified.
+- 2026-05 — *Coordination as an Architectural Layer for LLM-Based Multi-Agent Systems* — arxiv.org/pdf/2605.03310 — reported as ~350 resolved binary predictions per condition for a 0.02 difference at α = 0.05, 80% power. The table says 9,804 — a 28× gap. This entry previously described the figure as "consistent in shape with the computed table", which was wrong and is retracted: 350 independent Bernoulli observations cannot resolve a two-point difference at any conventional power, so either the outcome is not what it appears or the summary is inaccurate. **Not reconciled.**
+
+If either is genuinely comparable, the table is wrong and should be corrected. Nobody has established that they are comparable, and the table is derived from first principles and reproduced empirically by `examples/evals/`, so the table stands until someone reads those two papers properly.
 
 **Token spend explains most of the difference between architectures**
 
