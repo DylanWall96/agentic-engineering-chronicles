@@ -1,7 +1,7 @@
 # Verification in the Agentic Loop
 
 **Covers** — why a passing test suite is weaker evidence when an agent wrote the code, the routes it takes to green without solving the problem, and what to hold back so you can tell the difference.
-**Assumes** — 001, which says verification beats execution and leaves it there. This is the follow-through.
+**Assumes** — 001. This is the follow-through on its verification-beats-execution line.
 **Runnable** — [`examples/verification/`](../examples/verification/), where a green suite hides three real bugs.
 
 ---

@@ -58,6 +58,14 @@ Three for three suggests the failure is structural rather than careless. Prose w
 
 If the example contradicts the chronicle, the chronicle is what changes. Never adjust an example to agree with prose.
 
+## When editing an existing chronicle
+
+Later chronicles describe earlier ones. Editing 001 can silently invalidate how 002 or 003 characterises it, and nothing catches that except reading them in sequence.
+
+After changing a chronicle, grep the others for references to it and check that what they say about it is still true. This has already happened once: 001 gained a forward pointer to 002, which made 002's opening line — "001 says verification beats execution and leaves it there" — describe a version of 001 that no longer existed. Four commits passed before a sequential read caught it.
+
+Describe what an earlier chronicle *is about*, not what it *fails to do*. The first stays true when the earlier document changes; the second is a hostage to it.
+
 ## What to leave alone
 
 - Don't renumber existing chronicles. Numbers are referenced externally.

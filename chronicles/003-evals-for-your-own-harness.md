@@ -4,7 +4,7 @@
 **Assumes** — 001. Where 002 verifies what the agent produced, this verifies the thing producing it.
 **Runnable** — [`examples/evals/`](../examples/evals/), the run-count argument as a simulation. No model calls.
 
-001 lists "you have evals" as a precondition for moving past a single agent, and advises testing skills against held-out cases. It never says what an eval is, how you would build one, or how you would know a harness change helped. This is the follow-through.
+001 treats evals as a precondition twice over: for moving past a single agent, and for shipping a skill you have actually tested. Both times it points here for what one is. This is that — how to build one, what it can and cannot resolve, and how to tell whether the change you just made to your setup did anything at all.
 
 ---
 
@@ -158,7 +158,7 @@ For a solo engineer, building and maintaining this is real overhead against unce
 
 Reading your traces carefully — actually reading them, not skimming for the failure — will probably teach you more per hour than a formal suite until a regression bites you twice. The case for the apparatus strengthens with the number of people depending on the setup, the frequency with which you change it, and the cost of it silently degrading. A team of twenty sharing a harness is in a different position from one person who can feel when their tooling turns.
 
-Scale it to consequence, as with everything else. A golden set for the workflow your team runs daily; a careful read of the trace for the experiment you ran once. Applying the full apparatus uniformly is its own kind of waste, and the surest way to abandon the practice entirely is to make it heavier than the problem.
+A golden set for the workflow your team runs daily; a careful read of the trace for the experiment you ran once. The surest way to abandon this practice altogether is to make it heavier than the problem it solves.
 
 One caveat this chronicle owes itself. The studies above are individually well-designed and independent, and each is a single result. A single controlled study is one run — better instrumented than yours, and still one. Treat the findings here as the best evidence currently available rather than as settled, and hold them the way this chronicle asks you to hold your own measurements.
 
@@ -181,7 +181,7 @@ One caveat this chronicle owes itself. The studies above are individually well-d
 | Your suite beats theirs | Public benchmarks answer a different question and carry contamination |
 | The suite is a claim | A harness tuned until it goes green has optimised against the measurement |
 | Prefer removing | Deleting scaffolding needs only proof nothing got worse |
-| Scale to consequence | Trace-reading may beat evals until a regression bites twice |
+| Lighter than the problem | Trace-reading may beat evals until a regression bites twice |
 
 ---
 

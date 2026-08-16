@@ -2,7 +2,7 @@
 
 **Covers** — the foundation the other chronicles assume, and it is deliberately broad: how context works and how to budget it, context files, skills, hooks, when to reach for MCP servers and plugins, going from one agent to several, permissions and sandboxing, and carrying state between sessions.
 **Assumes** — nothing. Start here.
-**Artefacts** — [`templates/`](../templates/) holds copyable versions of everything recommended below.
+**Runnable** — nothing yet. [`templates/`](../templates/) holds copyable versions of everything recommended below.
 
 Most of what follows is practitioner consensus rather than measured result. That is worth stating at the top, because some of it has already failed to survive contact with evidence — noted where it happens. Chronicle 003 covers how you would tell the difference for your own setup.
 
@@ -138,7 +138,7 @@ The agent needs to see what a "good run" looks like before you can codify it. Pr
 
 - Keep `SKILL.md` short. Push deeper reference material into linked files.
 - Make the description slightly pushy. Models tend to under-trigger skills. Phrase descriptions to invite use ("Use this skill whenever the user mentions X, Y, or Z — even if they don't explicitly ask for it").
-- Test before shipping. Use whatever evaluation tooling your harness provides; run skills against held-out test cases and iterate on the description based on failures.
+- Test before shipping. Run the skill against held-out cases and iterate on the description based on what fails. Chronicle 003 covers what that actually takes, including how many runs it takes before a difference means anything.
 - Version skills like any other software artefact.
 
 ### Recursive improvement
@@ -310,7 +310,7 @@ Multi-agent orchestration becomes useful when:
 Pre-conditions before adopting:
 
 - You can tell whether the multi-agent setup is actually beating a single agent. Chronicle 003 covers what that takes, and the honest answer is more runs than most people expect.
-- The task value justifies it. Multi-agent setups burn token budget linearly with team size, plus coordination overhead. Where this has been measured, token spend alone accounts for most of the performance difference between multi-agent and single-agent setups — some of what looks like an architecture win is a budget win, and it's worth checking which one you're buying.
+- The task value justifies it. Multi-agent setups burn token budget linearly with team size, plus coordination overhead. Where this has been measured, token spend alone accounts for most of the performance difference between multi-agent and single-agent setups — much of what looks like an architecture win is a budget win.
 - You're consistently running three or more agents per task.
 
 ### When parallel multi-agent works, and when it doesn't
