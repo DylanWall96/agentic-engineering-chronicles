@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### 2026-08-09 — Faros 2026, hooks README
+
+Changed:
+- Swapped the Faros citation from the 2025 telemetry to *The AI Engineering Report 2026: The Acceleration Whiplash* — 22,000 developers and 4,000 teams over two years, against 10,000 and 1,255. Same direction, much stronger sample, and it adds the finding that deployments per week fall while task throughput rises
+- Downgraded one unsourced claim to largely-supported: Faros carries "real but smaller", but "than it feels" still needs a current perception measurement
+
+Added:
+- A paragraph to 002's *The Cost, Honestly* on the second-order failure — when review becomes the bottleneck, review is what gets skipped
+- `templates/hooks/README.md`, matching `templates/settings/`, covering install, the freeze sentinel, hook mechanics, and the limits of hooks as a control
+
 ### 2026-08-09 — Runnable examples
 
 Added:
@@ -177,7 +187,7 @@ The chronicle bodies carry no citations by design. Every claim in them that asse
 **The saved time reappears downstream in review and rework**
 
 - 2025-07-10 — METR, *Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity* — metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/ — 16 developers, 246 tasks, 19% slower with AI while believing they were 20% faster. **METR now labels this out of date**; its 2026-02-24 follow-up redesigns the experiment rather than restating the figure — metr.org/blog/2026-02-24-uplift-update/. Cite for the perception gap, not as a current productivity measurement.
-- Faros AI, 2025 telemetry across 10,000+ developers and 1,255 teams — high-adoption teams completed 21% more tasks and merged 98% more PRs, while PR review time rose 91%, PR size 154%, and bug counts 9%. This is the clearest evidence for the relocation-of-cost argument.
+- 2026 — Faros AI, *The AI Engineering Report 2026: The Acceleration Whiplash* — faros.ai/research/ai-acceleration-whiplash — telemetry, not surveys, across 22,000 developers and 4,000 teams over two years. Throughput genuinely rises: task completion +33.7%, epics +66.2%, PR merge rate +16.2%. The cost lands downstream: bugs per developer +54%, monthly incidents +57.9%, incidents per PR 3×, median PR review time 5×, code churn 10×, and 31% more PRs merging with no review at all. Deployments per week fall 11.7% — the throughput gain does not reach the end of the pipeline. This is the clearest evidence for the relocation-of-cost argument. † Vendor-published; Faros sells engineering analytics, so a finding that teams need better measurement serves its product. The telemetry basis and sample size still make it the strongest measurement available.
 - GitClear, *The Maintainability Gap: 2026 AI Code Quality Research* — gitclear.com/the_ai_code_quality_maintainability_gap — copy-pasted code 9.4% (2022) to 15.7% (early 2026); refactored code 21% to 3.8%; two-week churn rising.
 - DORA, 2025 State of DevOps — Rework Rate added as a fifth metric, with review burden elevated as a leading indicator.
 
@@ -187,4 +197,4 @@ Listed rather than dropped. Each is either weakly supported or an inference stat
 
 - **"Untested context files can actively hurt agent performance"** (001, Skills) — the adjacent evidence covers context *length* degrading performance. Nothing found ties *untested* context specifically to harm.
 - **"The gap widens with difficulty"** and **"it correlates with struggle"** (002) — consistent with how the reward-hacking literature frames the incentive, but not located as a measured result.
-- **"Teams that measure this find the throughput improvement real but smaller than it feels"** (002) — Faros supports the direction; the specific characterisation is inference.
+- **"Teams that measure this find the throughput improvement real but smaller than it feels"** (002) — now largely supported. Faros 2026 carries "real but smaller": throughput up by a third while deployments per week fall. The "than it feels" half needs a perception measurement, and the only one located is METR's, which METR labels out of date. Retained here until something current measures the gap between believed and actual.

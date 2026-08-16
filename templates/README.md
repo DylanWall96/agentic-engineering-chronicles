@@ -12,7 +12,7 @@ Verify anything here against your harness's own documentation before relying on 
 | --- | --- | --- |
 | `CLAUDE.md` | Annotated context-file starter. Delete more than you add. | [001](../chronicles/001-effective-agent-workspace-setup.md) — *CLAUDE.md and AGENTS.md* |
 | `AGENTS.md` | The universal-rules version, for mixed-tool teams. | [001](../chronicles/001-effective-agent-workspace-setup.md) — *CLAUDE.md and AGENTS.md* |
-| `hooks/` | Deterministic enforcement: format, freeze tests, block destructive commands. | [001](../chronicles/001-effective-agent-workspace-setup.md) — *Hooks*; [002](../chronicles/002-verification-in-the-agentic-loop.md) — *Making Tests Hard to Game* |
+| [`hooks/`](hooks/) | Deterministic enforcement: format, freeze tests, block destructive commands. | [001](../chronicles/001-effective-agent-workspace-setup.md) — *Hooks*; [002](../chronicles/002-verification-in-the-agentic-loop.md) — *Making Tests Hard to Game* |
 | `settings/settings.json` | Permissions and sandboxing reflecting the containment posture. | [001](../chronicles/001-effective-agent-workspace-setup.md) — *Permission Modes and Sandboxing* |
 
 ## How to use them

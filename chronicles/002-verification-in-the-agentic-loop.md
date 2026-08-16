@@ -129,6 +129,8 @@ Verification takes time, and that time comes out of the gains. A workflow with h
 
 The trade is worth making anyway, because the alternative isn't faster — it's the same work relocated to whoever finds the bug in production, plus the cost of finding it there. But it should be a decision, not a surprise. The failure pattern is a team that captures the generation speedup, doesn't build the verification capacity, and discovers the imbalance as a rising defect rate several months later.
 
+Watch for the second-order version of this, because it is the one that creeps. As generation accelerates, review becomes the bottleneck, and the first thing to give is review itself — the queue lengthens, the changes arriving are larger, and a growing share of them start going through without one. Nobody decides this. It is what a fixed amount of review attention does when the volume in front of it doubles. The measured picture across large telemetry samples is throughput up, review time up several-fold, and a meaningful slice of changes merging unreviewed. If your verification capacity doesn't grow with your generation rate, it doesn't hold steady; it quietly gets skipped.
+
 Scale it to consequence. A held-out suite for a payments path; a quick diff read for a copy change. Applying the full apparatus uniformly is its own kind of waste.
 
 ---
