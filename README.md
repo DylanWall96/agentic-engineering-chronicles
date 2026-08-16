@@ -8,6 +8,7 @@ An evergreen collection on **agentic software engineering**: what has held up ac
 
 - **[001 — Effective Agent Workspace Setup](chronicles/001-effective-agent-workspace-setup.md)** — The mental model, context as a finite budget, `CLAUDE.md` and `AGENTS.md`, skills, hooks, when to reach for MCP servers and plugins, scaling from one agent to many, permissions and sandboxing, and cross-session state. Assumes nothing; start here.
 - **[002 — Verification in the Agentic Loop](chronicles/002-verification-in-the-agentic-loop.md)** — Why a passing test suite is weaker evidence when an agent wrote the code, the routes agents take to green without solving the problem, held-out oracles, and what detection actually catches. Assumes 001.
+- **[003 — Evals for Your Own Harness](chronicles/003-evals-for-your-own-harness.md)** — How you would know a harness change helped: why one run is no evidence, how many you actually need, golden sets, cost as a first-class metric, and why your own small suite beats a public benchmark. Assumes 001, and qualifies it.
 
 ## Run it rather than trust it
 

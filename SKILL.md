@@ -25,8 +25,12 @@ Read only what the task needs. Each chronicle is self-contained prose; the templ
 | Reviewing a large agent-authored diff | `chronicles/002` — *Detection* |
 | Finding that tests pass but behaviour is wrong | `chronicles/002` — *How Agents Cheat* |
 | Unconvinced that any of 002 is real | `examples/verification/` — run it |
+| Asking whether a harness change helped | `chronicles/003-evals-for-your-own-harness.md` |
+| Comparing two setups, or two model tiers | `chronicles/003` — *The Minimum Unit of Evidence*, *Cost as a Metric* |
+| Building a golden set, or scoring agent runs | `chronicles/003` — *The Golden Set*, *Scripts and Judges* |
+| Citing a public benchmark to justify a choice | `chronicles/003` — *Your Own Suite and the Public Ones* |
 
-Chronicle 002 assumes 001. If the user is starting from nothing, 001 first.
+Chronicles 002 and 003 both assume 001. If the user is starting from nothing, 001 first. 003 carries findings that qualify 001 — read the qualifier in 001's *CLAUDE.md and AGENTS.md* section alongside it.
 
 ## Applying it
 

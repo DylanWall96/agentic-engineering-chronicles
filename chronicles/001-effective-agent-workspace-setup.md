@@ -97,6 +97,8 @@ Your persistent project context. Most setups support generating a starter from t
 
 **The test:** any new contributor should be able to start an agent and ask "run the tests" and have it work first try. If it doesn't, your context file is missing essential setup or build commands.
 
+**The benefit isn't automatic.** Controlled evaluation on real repository tasks found that supplying a context file did not generally improve task success, while adding meaningful inference cost on every run. That doesn't make context files useless — it makes them a change you should verify rather than assume, and it raises the bar for every line you keep. Treat length as a cost you are paying for a benefit you have not measured. Chronicle 003 covers how you would measure it.
+
 **AGENTS.md is now the cross-tool standard, not merely a fallback.** It is governed by a vendor-neutral foundation, adopted across a large and growing share of repositories, and read natively by most major agent harnesses. A few harnesses remain exceptions, reading their own file by default — check which yours does rather than assuming.
 
 The practical pattern for any team using more than one tool — which is most teams — is to make `AGENTS.md` the source of truth holding the universal rules, and keep a thin Claude-specific file that imports it and adds only Claude-specific behaviour. An import directive or a symlink both work. Don't duplicate rules across both; a rule that exists in two files will disagree with itself within a month.

@@ -174,6 +174,49 @@ The chronicle bodies carry no citations by design. Every claim in them that asse
 - 2026-02 — *Malicious Agent Skills in the Wild: A Large-Scale Security Empirical Study* — arxiv.org/html/2602.06547v1 — 534 of 3,984 skills (13.4%) carrying critical security issues.
 - Zenity — malicious skills across ~1.7M installs, aimed at credential theft and supply-chain persistence.
 
+### Chronicle 003 — Evals for Your Own Harness
+
+**Context files do not generally improve task success, and cost more**
+
+- 2026-02-12 (v1), revised 2026-06-23 — Gloaguen, Mündler, Müller, Raychev, Vechev, *Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?* — arxiv.org/abs/2602.11988 — SWE-bench tasks with generated context files, plus a new collection of issues from repositories carrying developer-committed ones. Verbatim from the abstract: "providing context files does not generally improve task success rates, while increasing inference cost by over 20% on average."
+  - **Excluded deliberately:** secondary write-ups report a per-variant split of roughly +4% for developer-written files and −3% for generated ones. That split is not in the abstract, which reports the finding undifferentiated, and the PDF body could not be read to confirm it. A number that cannot be checked in the primary should not carry a claim, so the body states only the general finding.
+
+**Context-file structure does not detectably affect instruction adherence**
+
+- 2026-05-11 — McMillan, *Instruction Adherence in Coding Agent Configuration Files: A Factorial Study of Four File-Structure Variables* — arxiv.org/abs/2605.10039 — 1,650 agent sessions, 16,050 function-level observations, two codebases, three models. Varied file size, instruction position, file architecture, and contradictions between adjacent files. None of the four, and none of the three two-way interactions, produced a detectable contrast after multiple-testing correction. Size and conflict nulls carry affirmative-null Bayes factors (BF10 0.05–0.10) — positive evidence of no effect rather than a failure to reject.
+  - Largest effect measured was within-session: roughly 5.6% lower odds of compliance per additional function generated (OR 0.944), non-monotonic, identified during analysis rather than pre-specified. This supports 001's fresh-session and compaction advice while cutting against its stated file-length mechanism.
+
+**Runs are non-deterministic even at fixed temperature**
+
+- *Understanding and Mitigating Numerical Sources of Nondeterminism in LLM Inference* — arxiv.org/html/2506.09501v2 — variation arising from the inference stack, not only from sampling.
+- *How Consistent Are LLM Agents? Measuring Behavioral Reproducibility in Multi-Step Tool-Calling Pipelines* — arxiv.org/html/2605.28840
+
+**How many runs it takes to detect a difference**
+
+The body carries magnitudes rather than figures. The figures, and what they are conditional on:
+
+- Computed for this chronicle, not borrowed: two-proportion z-test, binary pass/fail per task, baseline success 50%, α = 0.05, two-sided. Runs **per configuration**: 2pp effect — 9,803 at 80% power, 13,124 at 90%. 5pp — 1,562 / 2,091. 10pp — 385 / 515. 15pp — 167 / 223. 40pp — 17 / 22. Baseline rates away from 50% reduce these somewhat; paired designs reduce them further. Reproduced empirically by `examples/evals/`.
+- 2025-12 — *ReasonBENCH: Benchmarking the (In)Stability of LLM Reasoning* — arxiv.org/pdf/2512.07795 — two-stage power analysis justifying 30 runs per configuration for a 5% effect at 90% power, α = 0.05.
+  - **Not cited in the body, and worth recording why.** Its unit of observation is a benchmark *score* — a scaled sum over many per-problem Bernoulli outcomes — so its variance is far lower than a per-task pass/fail. Quoting "30 runs for a 5% effect" to someone re-running a golden set would understate what they need by roughly two orders of magnitude. The figure is correct for what it measures and wrong for what a reader would use it for.
+- 2026-05 — *Coordination as an Architectural Layer for LLM-Based Multi-Agent Systems* — arxiv.org/pdf/2605.03310 — ~350 resolved binary predictions per condition to detect a 0.02 difference at α = 0.05, 80% power. Binary outcome, consistent in shape with the computed table.
+
+**Token spend explains most of the difference between architectures**
+
+- 2025-06 — Anthropic, *How we built our multi-agent research system* — token usage alone explains 80% of performance variance on BrowseComp; tool calls ~10%, model choice ~5%. † Vendor, and the finding cuts against the vendor's interest, which strengthens it.
+- *Single-Agent LLMs Outperform Multi-Agent Systems on Multi-Hop Reasoning Under Equal Thinking Token Budgets* — the advantage disappears when budget is held constant.
+
+**LLM judges carry replicated biases**
+
+- 2024-10 — *Self-Preference Bias in LLM-as-a-Judge* — arxiv.org/pdf/2410.21819
+- 2026-06 — *The Coin Flip Judge? Reliability and Bias in LLM-as-a-Judge Evaluation* — arxiv.org/pdf/2606.13685
+- Position, verbosity, and self-enhancement biases quantified at scale, with swap-augmented evaluation proposed as calibration for position effects. Judge frameworks require empirical calibration against human annotators per task.
+
+**Public benchmarks carry contamination and leakage**
+
+- 32.67% of successful agent resolutions involved solution leakage — the fix or a direct pointer present in the issue description or comments.
+- *Does SWE-Bench-Verified Test Agent Ability or Model Memory?* — arxiv.org/html/2512.10218v2 — a frontier model identifies the buggy file at 76% accuracy from the issue description alone, with no repository context.
+- *SWE-Bench+* — arxiv.org/pdf/2410.06992 — 31.08% of accepted patches passed against test suites too weak to reject an incorrect solution; filtering these drops apparent effectiveness from 12.47% to 3.97%.
+
 ### Chronicle 002 — Verification in the Agentic Loop
 
 **Agents reach green by routes you didn't intend**
@@ -195,6 +238,8 @@ The chronicle bodies carry no citations by design. Every claim in them that asse
 
 Listed rather than dropped. Each is either weakly supported or an inference stated as fact in a chronicle body.
 
-- **"Untested context files can actively hurt agent performance"** (001, Skills) — the adjacent evidence covers context *length* degrading performance. Nothing found ties *untested* context specifically to harm.
+- ~~**"Untested context files can actively hurt agent performance"** (001, Skills)~~ — **retired 2026-08-16.** Now sourced, and more precisely than the original claim: context files do not generally improve task success and add over 20% inference cost (Gloaguen et al.), and no structural property of them detectably affects adherence (McMillan). The original phrasing implied that *testing* was the differentiator; the evidence does not support that framing, so 001 carries a qualifier about the benefit not being automatic instead.
+- **Golden-set sizing** (003, *The Golden Set*) — practitioner writing widely converges on a range of a few dozen cases. No measurement behind it was located. The body says so explicitly and declines to give a number, deferring to the run-count arithmetic instead.
+- **"Reading your traces carefully will probably teach you more per hour than a formal suite until a regression bites you twice"** (003, *The Cost, Honestly*) — a judgement about where effort pays off at small scale. No measurement located, and it is stated as opinion in the body rather than as finding.
 - **"The gap widens with difficulty"** and **"it correlates with struggle"** (002) — consistent with how the reward-hacking literature frames the incentive, but not located as a measured result.
 - **"Teams that measure this find the throughput improvement real but smaller than it feels"** (002) — now largely supported. Faros 2026 carries "real but smaller": throughput up by a third while deployments per week fall. The "than it feels" half needs a perception measurement, and the only one located is METR's, which METR labels out of date. Retained here until something current measures the gap between believed and actual.
